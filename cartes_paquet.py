@@ -33,9 +33,9 @@ class PaquetCartes:
             hauteur_min = 0 if nb == 52 else 6 #on commence au 7 pour un jeu de 32
             self.cartes = [Carte(couleur, hauteur) for hauteur in HAUTEURS[hauteur_min:]
                                            for couleur in COULEURS]
-        if nb ==32:
-            #il faut rajouter l'As
-            self.cartes.extend([Carte(couleur, '1') for couleur in COULEURS])
+            if nb ==32:
+                #il faut rajouter l'As
+                self.cartes.extend([Carte(couleur, '1') for couleur in COULEURS])
         if nb == 40:
             #Jeu de scopa
             self.cartes = [Carte(couleur, hauteur) for hauteur in HAUTEURS_SCOPA for couleur in COULEURS]

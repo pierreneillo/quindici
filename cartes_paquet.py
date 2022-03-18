@@ -66,9 +66,10 @@ class PaquetCartes:
         cette méthode ajoute les cartes en question au paquet
         '''
         #Dans la deuxième condition, on teste si tous les éléments de la liste sont de la classe Carte.
-        #Pour cela, on crée une chaîne de caractères composée de 1 et de 0, ou chaque 1 représente un élément qui est effectivement de la classe Carte et chaque 0 représente un élément qui n'est pas de la classe Carte.
-        #On compare ensuite cette chaîne à la représentation binaire de 2**(len(cartes+1) - 1 soit '1'*len(cartes)
-        if type(cartes)==list and "".join([str(int(type(e)==Carte)) for e in cartes])==bin((1<<len(cartes)+1)-1)[2:]:
+        #Pour cela, on crée une chaîne de caractères composée de 1 et de 0, ou chaque 1 représente un élément
+        #qui est effectivement de la classe Carte et chaque 0 représente un élément qui n'est pas de la classe Carte.
+        #On compare ensuite cette chaîne à '1'*len(cartes)
+        if type(cartes)==list and "".join([str(int(type(e)==Carte)) for e in cartes])=='1'*len(cartes):
             self.cartes.extend(cartes)
         else:
             raise ValueError("'cartes' doit être une liste d'éléments de type Carte'")
@@ -78,7 +79,10 @@ class PaquetCartes:
         renvoie la carte tirée au sommet du paquet
         si le paquet est vide, lève une exception
         '''
-        pass
+        if self.est_vide():
+            raise IndexError("stack is empty")
+        else:
+            return self.cartes.pop()
 
 
 def affiche_jeu(liste_cartes):

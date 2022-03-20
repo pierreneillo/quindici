@@ -12,7 +12,7 @@ class Carte:
         @hauteur est un str de '1' pour l'As à 'K' pour le roi
         @couleur est un str entre 'c', 'd', 'h', 's'
         @valeur est un entier correspondant à la force de la carte
-         : 2 pour la plus faible (2) à 14 pour l'As (le plus fort)
+         : 1 pour la plus faible (1) à 10 pour le Roi
         @dessin est un caractère Unicode représentant la carte en miniature
         '''
         self.couleur = couleur
@@ -28,6 +28,10 @@ class Carte:
 
 class PaquetCartes:
     def __init__(self, nb):
+        '''
+        @nb: le nombre de cartes dans le paquet
+        @cartes: Un tableau dynamique python contenant des instances de la classe Carte, représente le paquet de cartes
+        '''
         self.nb_cartes = nb
         if nb!=40:
             hauteur_min = 0 if nb == 52 else 6 #on commence au 7 pour un jeu de 32
@@ -62,7 +66,7 @@ class PaquetCartes:
 
     def remplir(self, cartes):
         '''
-        cartes est une liste d'objets Carte
+        @cartes est une liste d'objets Carte
         cette méthode ajoute les cartes en question au paquet
         '''
         #Dans la deuxième condition, on teste si tous les éléments de la liste sont de la classe Carte.

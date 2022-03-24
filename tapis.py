@@ -81,9 +81,16 @@ class Tapis():
         '''
         quindici = False
         combinaisons_possibles = []
-        #TODO: Ici, il faut trouver un moyen de trouver toutes les combinaisons possibles        
-        combinaisons_possibles.sort(len)
-        combinaison_optimale = combinaisons_possibles[-1]
+        for i in range(1, len(self.contenu)):
+            combinaisons_possibles.extend(list(itetools.combinations(self.contenu),i))
+        combinaisons_possibles = [combinaison for combinaison in combinaison_possibles if sum(combinaison, key = lambda x:x.valeur)==15]
+        combinaisons_possibles.sort(key = lambda x: x.count(0))#compter les carreaux
+        combinaisons_possibles.sort(key=len)
+        if len(combinaisons_possibles)!=0:
+            quindici = True
+            combinaison_optimale = combinaisons_possibles[-1]
+        else:
+            combinaison_optimale = None
         return quindici, combinaison_optimale
 
 

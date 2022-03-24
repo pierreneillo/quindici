@@ -61,9 +61,10 @@ class Tapis():
         si on ne trouve pas la carte, on lève une exception type ValueError
         '''
         #First check if card is on the table:
-        id_contenu = list(map(,self.contenu))
+        id_contenu = list(map(lambda x:x.couleur+x.hauteur,self.contenu))
         if id_carte not in id_contenu:
             raise ValueError("La carte n'est pas sur le tapis")
+        self.contenu.pop(id_contenu.index(id_carte))
             
 
 
@@ -78,9 +79,11 @@ class Tapis():
         et à égalité : celle où il y a le plus de carreaux
         (on pourrait aussi traiter à part le 7 de carreaux...)
         '''
-        #à vous
-
-
+        quindici = False
+        combinaisons_possibles = []
+        #TODO: Ici, il faut trouver un moyen de trouver toutes les combinaisons possibles        
+        combinaisons_possibles.sort(len)
+        combinaison_optimale = combinaisons_possibles[-1]
         return quindici, combinaison_optimale
 
 

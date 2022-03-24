@@ -23,7 +23,7 @@ class Tapis():
         self.joueur_actuel = ''
 
     def est_vide(self):
-        pass
+        return len(self.contenu)==0
 
 
 
@@ -31,7 +31,7 @@ class Tapis():
         '''
         position est un str dans la chaîne 'SONE'
         '''
-        pass
+        self.joueur_actuel = position
 
     def afficher(self):
         if self.est_vide():
@@ -41,9 +41,8 @@ class Tapis():
             #à compléter : faites afficher toutes les cartes du tapis
             # (en ligne de préférence)
             #exemple :  tapis :  s3 🂣+sJ 🂫+s1 🂡+d3 🃃+
-            #
-            #..........
-            #
+            repr_cartes = list(map(repr,self.contenu)))
+            print(" + ".join(repr_cartes))
 
         print() #pour sauter une ligne
 
@@ -51,7 +50,7 @@ class Tapis():
 
     def ajouter(self, carte):
         '''ajoute la carte au contenu du tapis'''
-        pass
+        self.contenu.append(carte)
 
 
 
@@ -61,7 +60,11 @@ class Tapis():
         id_carte est un str du type 'c7'
         si on ne trouve pas la carte, on lève une exception type ValueError
         '''
-        pass
+        #First check if card is on the table:
+        id_contenu = list(map(,self.contenu))
+        if id_carte not in id_contenu:
+            raise ValueError("La carte n'est pas sur le tapis")
+            
 
 
 

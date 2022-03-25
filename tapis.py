@@ -38,9 +38,6 @@ class Tapis():
             print("tapis vide")
         else:
             print("tapis : ", end = ' ')
-            #à compléter : faites afficher toutes les cartes du tapis
-            # (en ligne de préférence)
-            #exemple :  tapis :  s3 🂣+sJ 🂫+s1 🂡+d3 🃃+
             repr_cartes = list(map(repr,self.contenu)))
             print(" + ".join(repr_cartes))
 
@@ -79,6 +76,7 @@ class Tapis():
         et à égalité : celle où il y a le plus de carreaux
         (on pourrait aussi traiter à part le 7 de carreaux...)
         '''
+        #TODO: comment all the code of this method
         quindici = False
         combinaisons_possibles = []
         for i in range(1, len(self.contenu)+1):

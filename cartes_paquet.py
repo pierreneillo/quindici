@@ -1,136 +1,106 @@
 import random
-from cartes_paquet import Carte, PaquetCartes
-import itertools
-
-def affiche_jeu(liste_cartes):
-    for carte in liste_cartes:
-        print(carte, end = '+')
-    print()
+from constantes import *
 
 
-## c'est le tapis où les joueurs posent une carte chacun leur tour
-class Tapis():
-    def __init__(self):
+class Carte:
+    #variables de classe : correspondance hauteurs et couleurs
+    #on récupère les dessins Unicode des cartes (sauf le cavalier)
+    JEU_IMAGES = [[chr(127184 - c*16 + h + 1 + (h > 12)) for h in range(13)] for c in range(4)]
+
+    def __init__(self, couleur, hauteur):
         '''
-        @contenu : liste d'objets cartes
-        @joueur_actuel : str dans la chaîne SN : indique qui pose sa carte sur le tapis
-        @quindici : Booléen indiquant s'il existe une (ou plusieurs) combinaisons valant 15
-        @scopa : Booléen indiquant si la combinaison trouvée permet de vider le tapis
+        @hauteur est un str de '1' pour l'As à 'K' pour le roi
+        @couleur est un str entre 'c', 'd', 'h', 's'
+        @valeur est un entier correspondant à la force de la carte
+         : 1 pour la plus faible (1) à 10 pour le Roi
+        @dessin est un caractère Unicode représentant la carte en miniature
         '''
-        self.contenu = []
-        self.quindici = False
-        self.scopa = False
-        self.joueur_actuel = ''
+        self.couleur = couleur
+        self.hauteur = hauteur
+        self.dessin = self.JEU_IMAGES[DICO_COULEURS[couleur]][DICO_HAUTEURS[hauteur]]
+        #à compléter
+        self.valeur = DICO_VALEURS[hauteur]
+
+    def __str__(self):
+        #permet de faire print facilement
+        return self.couleur+self.hauteur + ' ' + self.dessin
+    def __repr__(self):
+        return self.couleur+self.hauteur + ' ' + self.dessin
+
+
+class PaquetCartes:
+    def __init__(self, nb):
+        '''
+        @nb: le nombre de cartes dans le paquet
+        @cartes: Un tableau dynamique python contenant des instances de la classe Carte, représente le paquet de cartes
+        '''
+        self.nb_cartes = nb
+        if nb!=40:
+            hauteur_min = 0 if nb == 52 else 6 #on commence au 7 pour un jeu de 32
+            self.cartes = [Carte(couleur, hauteur) for hauteur in HAUTEURS[hauteur_min:]
+                                           for couleur in COULEURS]
+            if nb ==32:
+                #il faut rajouter l'As
+                self.cartes.extend([Carte(couleur, '1') for couleur in COULEURS])
+        if nb == 40:
+            #Jeu de scopa
+            self.cartes = [Carte(couleur, hauteur) for hauteur in HAUTEURS_SCOPA for couleur in COULEURS]
+
+
+    def battre(self):
+        '''
+        mélange le paquet de façon aléatoire
+        '''
+        random.shuffle(self.cartes)
+
+    def couper(self):
+        '''
+        simule le fait de couper le paquet en deux à un endroit aléatoire
+        puis de permuter les deux parties "dessus - dessous"
+        '''
+        i_coupe = random.randint(0,len(self.cartes)-1)
+        dessous = self.cartes[:i_coupe]
+        dessus = self.cartes[i_coupe:]
+        self.cartes = dessus + dessous
 
     def est_vide(self):
-        return len(self.contenu)==0
+        return len(self.cartes)==0
 
-
-
-    def changer_joueur(self, position):
+    def remplir(self, cartes):
         '''
-        position est un str dans la chaîne 'SONE'
+        @cartes est une liste d'objets Carte
+        cette méthode ajoute les cartes en question au paquet
         '''
-        self.joueur_actuel = position
+        #Dans la deuxième condition, on teste si tous les éléments de la liste sont de la classe Carte.
+        #Pour cela, on crée une chaîne de caractères composée de 1 et de 0, ou chaque 1 représente un élément
+        #qui est effectivement de la classe Carte et chaque 0 représente un élément qui n'est pas de la classe Carte.
+        #On compare ensuite cette chaîne à '1'*len(cartes)
+        if type(cartes)==list and "".join([str(int(type(e)==Carte)) for e in cartes])=='1'*len(cartes):
+            self.cartes.extend(cartes)
+        else:
+            raise ValueError("'cartes' doit être une liste d'éléments de type Carte'")
 
-    def __repr__(self):
+    def tirer(self):
+        '''
+        renvoie la carte tirée au sommet du paquet
+        si le paquet est vide, lève une exception
+        '''
         if self.est_vide():
-            s="tapis vide"
+            raise IndexError("stack is empty")
         else:
-            s="tapis : "
-            repr_cartes = list(map(repr,self.contenu))
-            s+=" + ".join(repr_cartes)
-        return s
+            return self.cartes.pop()
 
 
+def affiche_jeu(liste_cartes):
+    """Affiche toutes les cartes du jeu de cartes passé en argument"""
+    return " ".join(list(map(str,liste_cartes)))
 
-    def ajouter(self, carte):
-        '''ajoute la carte au contenu du tapis'''
-        self.contenu.append(carte)
+#tests : quand vous êtes prêt
 
-
-
-    def enlever(self, id_carte):
-        '''
-        enlève la carte de la liste contenu et la renvoie
-        id_carte est un str du type 'c7'
-        si on ne trouve pas la carte, on lève une exception type ValueError
-        '''
-        #First check if card is on the table:
-        id_contenu = list(map(lambda x:x.couleur+x.hauteur,self.contenu))
-        if id_carte not in id_contenu:
-            raise ValueError("La carte n'est pas sur le tapis")
-        self.contenu.pop(id_contenu.index(id_carte))
-
-
-
-
-    def tester_quindici(self):
-        '''
-        c'est la "grosse méthode" du tapis
-        renvoie un tuple avec :
-        - Un booléen indiquant s'il existe une combinaison de cartes qui vaut 15
-        - et une liste, soit vide, soit contenant les cartes de la combinaison optimale
-        S'il y a plusieurs combinaisons valant 15... On prend celle avec le plus de cartes
-        et à égalité : celle où il y a le plus de carreaux
-        (on pourrait aussi traiter à part le 7 de carreaux...)
-        '''
-        #TODO: comment all the code of this method
-        self.quindici = False
-        combinaisons_possibles = []
-        for i in range(1, len(self.contenu)+1):
-            combinaisons_possibles.extend(list(itertools.combinations(self.contenu,i)))
-        combinaisons_possibles = [combinaison for combinaison in combinaisons_possibles if sum([x.valeur for x in combinaison])==15]
-        combinaisons_possibles.sort(key=len, reverse=True)
-        if len(combinaisons_possibles)!=0:
-            self.quindici = True
-            combinaison_max_cartes = [combinaisons_possibles[0]]
-            max = len(combinaisons_possibles[0])
-            for i in range(len(combinaisons_possibles)):
-                if len(combinaisons_possibles[i])==max:
-                    combinaison_max_cartes.append(combinaisons_possibles[i])
-                else:
-                    break
-            combinaison_max_cartes.sort(key = lambda x:len([y for y in x if y.couleur == 'd']))
-            combinaison_optimale = combinaison_max_cartes[-1]
-            if len(combinaison_optimale) == len(self.contenu):
-                self.scopa = True
-            else:
-                self.scopa = False
-        else:
-            combinaison_optimale = []
-        return self.quindici, combinaison_optimale
-
-
-#test
 if __name__ == '__main__':
-    def tester(texte):
-        print(texte)
-        print(tapis)
-        print(tapis.tester_quindici())
-        print("Scopa :",tapis.scopa)
-        print()
-
-    #créer des objets de type Carte
-    l = [Carte('s','J'), Carte('h','3'), Carte('d','5'), Carte('c','4')]
-    tapis = Tapis()
-    tester("Cas classique#0: paquet vide")
-    for c in l:
-        tapis.ajouter(c)
-
-    tester("Cas classique#1: Une seule combinaison possible")
-
-    tapis.enlever('sJ')
-    tester("Cas classique#2: Aucune combinaison possible")
-
-    tapis.ajouter(Carte('s','J'))
-    tapis.enlever('d5')
-    tester("Cas classique#3: 1 scopa possible")
-
-    tapis.ajouter(Carte('s','7'))
-    tester("Cas Intermédiaire#4: Comparer 2 combinaisons possibles dont le nombre de cartes diffère")
-
-    tapis.enlever('s7')
-    tapis.ajouter(Carte('d','4'))
-    tapis.ajouter(Carte('d','3'))
-    tester("Cas intermédaire#5: Comparer plusieurs combinaisons possibles dont le nombre de carreaux diffère mais dont le nombre de cartes est le même")
+    paq = PaquetCartes(32)
+    paq.battre()
+    for i in range(7):
+        c = paq.tirer()
+        print(c)
+    print(paq.est_vide())

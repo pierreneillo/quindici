@@ -77,14 +77,14 @@ class Tapis():
         (on pourrait aussi traiter à part le 7 de carreaux...)
         '''
         #TODO: comment all the code of this method
-        quindici = False
+        self.quindici = False
         combinaisons_possibles = []
         for i in range(1, len(self.contenu)+1):
             combinaisons_possibles.extend(list(itetools.combinations(self.contenu),i))
         combinaisons_possibles = [combinaison for combinaison in combinaison_possibles if sum(combinaison, key = lambda x:x.valeur)==15]
         combinaisons_possibles.sort(key=len)
         if len(combinaisons_possibles)!=0:
-            quindici = True
+            self.quindici = True
             combinaisons_min_cartes = [combinaisons_possibles[0]]
             min = len(combinaisons_possibles[0])
             for i in range(len(combinaisons_possibles)):
@@ -94,9 +94,11 @@ class Tapis():
                     break
             combinaisons_min_cartes.sort(key = lambda x:len([y for y in x if y.couleur == 's']))
             combinaison_optimale = combinaisons_min_cartes[-1]
+            if len(combinaiosn_optimale) == len(self.contenu):
+                self.scopa = True
         else:
-            combinaison_optimale = None
-        return quindici, combinaison_optimale
+            combinaison_optimale = []
+        return self.quindici, combinaison_optimale
 
 
 #test

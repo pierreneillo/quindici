@@ -29,6 +29,7 @@ class Partie:
     @afficher() : fait afficher les mains des joueurs et le tapis
     @distribuer() : remplit les mains des joueurs avec les cartes du paquet
     @start() : prépare tout pour le début du jeu
+    @simul_jeu() : simule une partie courte de jeu (1 tour)
     ...
 
     '''
@@ -96,7 +97,7 @@ class Partie:
         '''
         mélange le paquet, coupe, distribue les cartes
         pose 4 cartes sur le tapis
-        affiche le tout
+        n'affiche plus le tout car sinon le joueur voit le jeu de l'IA
         puis affiche ("on démarre")
         '''
         self.paquet.battre()
@@ -104,9 +105,61 @@ class Partie:
         self.distribuer()
         for _ in range(4):
             self.tapis.ajouter(self.paquet.tirer())
-        print(self)
+        #print(self) NE PAS DECOMMENTER, sinon le joueur verra le jeu de l'IA
         print("on démarre")
 
+    def simul_jeu(self):
+        '''
+        Simule une partie (1 tour):
+            -Lance la partie
+            -Fait jouer le Joueur et l'IA tant que les deux jeux ne sont pas vides
+        '''
+        self.start()
+        #Pour l'instant le joueur commence dans tous les cas
+        while sum([int(main.est_vide()) for main in self.mains])!=0:#Si au moins une main contient encore des cartes
+            #1 tour de boucle = 1 tour de jeu
+            #A 2 joueurs, le 'vrai' joueur est au Sud, soit à la position 0
+            #---------------------------Le 'vrai' joueur joue------------------------------------
+            print("Votre jeu :",self.mains[0])
+            print(self.tapis)
+            id_carte_a_jouer = self.mains[0].choix_output()
+            carte_jouee = self.mains[0].rejeter(id_carte_a_jouer)
+            self.tapis.ajouter(carte_jouee)
+            print(f"Vous avez joué {carte_jouee}")
+            quindici,combi_opt = self.tapis.tester_quindici()
+            if quindici:
+                if self.tapis.scopa:
+                    print("Scopa! Vous ramassez toutes les cartes")
+                else:
+                    print("Quindici! Vous ramassez les cartes :", "-".join(combi_opt))
+                self.mains[0].ajoute_plis(combi_opt)
+                for carte in combi_opt:
+                    self.tapis.enlever(carte.id)
+            else:
+                print("Dommage :( vous n'avez rien ramassé cette fois-ci...")
+            
+            print(self.tapis)
+            #---------------------------------L'IA joue----------------------------------------
+            id_carte_a_jouerIA = self.mains[0].choix_output()
+            carte_joueeIA = self.mains[0].rejeter(id_carte_a_jouerIA)
+            self.tapis.ajouter(carte_joueeIA)
+            print(f"L'IA a joué {carte_joueeIA}")
+            quindici,combi_opt = self.tapis.tester_quindici()
+            if quindici:
+                if self.tapis.scopa:
+                    print("Scopa! L'IA ramasse toutes les cartes")
+                else:
+                    print("Quindici! L'IA ramasse les cartes :", "-".join(combi_opt))
+                self.mains[0].ajoute_plis(combi_opt)
+                for carte in combi_opt:
+                    self.tapis.enlever(carte.id)
+            else:
+                print("L'IA rien ramassé cette fois-ci...")
+            print(self.tapis)
+            
+            
+            
+        
 
 
 

@@ -74,6 +74,7 @@ class Tapis():
         S'il y a plusieurs combinaisons valant 15... On prend celle avec le plus de cartes
         et à égalité : celle où il y a le plus de carreaux
         (on pourrait aussi traiter à part le 7 de carreaux...)
+        Cette méthode actualise l'attribut scopa
         '''
         #TODO: comment all the code of this method
         self.quindici = False

@@ -2,7 +2,7 @@ from cartes_paquet import *
 
 
 class MainJoueur:
-    """décris le joueur et son jeu, contient sa position (Nord=ordi sud=joueur)"""
+    """décrit le joueur et son jeu, contient sa position (Nord=ordi sud=joueur)"""
 
     def __init__(self,cartes,position):
         """
@@ -30,16 +30,15 @@ class MainJoueur:
 
     def afficher(self):
         """affiche le jeu trié par valeur de cartes"""
-        self.cartes.sort(key=lambda carte:carte.valeur)
-        for carte in self.cartes:
-            print(carte)
+        if self.est_vide():
+            print('la main est vide')
+        else:
+            reponse=''
+            self.cartes.sort(key=lambda carte:carte.valeur)
+            for carte in self.cartes:
+                reponse+=str(carte)+'-'
+            print(reponse)
 
-    def __repr__(self):
-        s = ""
-        self.cartes.sort(key=lambda carte:carte.valeur)
-        for carte in self.cartes:
-            s += repr(carte)
-        return s
 
     def recevoir(self,carte):
         """prend en paramètre une carte et l'insère dans le jeu"""
@@ -72,7 +71,7 @@ class MainJoueur:
             assert type(carte) is Carte,"les éléments de plis sont des Cartes"
 
         #on ajoute le plis au plis du joueur
-        self.plis.append(plis)
+        self.plis+=plis
 
 
     def choix_output(self):
@@ -81,15 +80,15 @@ class MainJoueur:
         compteur=0
         while not(present) and compteur!=5:
             compteur+=1
-            id_carte=input('saisissez l\'identifaint de la carte')
+            id_carte=input('saisissez l\'identifaint de la carte : ')
             id_carte.lower()
             #on vérifie que la carte est présente dans le paquet
             for carte in self.cartes:
-                if carte.id==id_carte:
+                if carte.id.lower()==id_carte:
                     present=True
                     choisie=carte
         if compteur==5:
-            raise ValueError('Vous passez votre tour : vous auriez dû vous concentrer et saisir le bon id')
+            print('Vous passez votre tour : vous auriez dû vous concentrer et saisir le bon id')
         elif present:
             return choisie
 
@@ -97,20 +96,31 @@ class MainJoueur:
 
 #tests
 if __name__=='__main__':
-    pass
+    #tests constructeur
+    j1=MainJoueur([Carte('c','K'),Carte('d','5'),Carte('h','1')],'S')
+    j2=MainJoueur([],'N')
+
+    assert not(j1.est_vide())#est_vide() ok
+    assert j2.est_vide()
+    j1.afficher()#afficher ok
+    j2.afficher()
+    j1.recevoir(Carte('d','4'))#recevoir ok
+    j2.recevoir(Carte('d','2'))
+    j1.afficher()
+    j2.afficher()
+    j1.rejeter('h1')#rejeter ok
+    j2.rejeter('d2')
+    j1.afficher()
+    j2.afficher()
+    print(j1.plis)
+    print(j2.plis)
+    j1.ajoute_plis(PaquetCartes(40).cartes)#ajoute_plis ok
+    j2.ajoute_plis(PaquetCartes(40).cartes)
+    print(j1.plis)
+    print(j2.plis)
+    print(j1.choix_output())#ok
+    j1.afficher()
 
 
 
 
-
-
-
-
-##en cours
-"""faire les import nécessaires"""
-
-"""demander clic canvas + si bien compris autres méthodes"""
-
-"""faire les tests"""
-
-"""diagramme classes à jour + rajouter attribut id dans classe carte"""

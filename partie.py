@@ -54,7 +54,7 @@ class Partie:
         #création des mains des joueurs
         # vides au départ !
         #à vous
-        self.mains = .................
+        self.mains = [MainJoueur([],POSITIONS[self.nb_joueurs][i]) for i in range(self.nb_joueurs)]
 
 
     def afficher(self):
@@ -62,7 +62,10 @@ class Partie:
         affiche les jeux des joueurs
         et le tapis
         '''
-        pass
+        print("Tapis :",self.tapis)
+        print("Mains :")
+        for main in self.mains:
+            print(main)
 
 
 
@@ -75,7 +78,7 @@ class Partie:
         for _ in range(self.nb_par_joueur):
             for _ in range(self.nb_joueurs):
                 #on distribue une carte à ce joueur
-                .................
+                self.mains[servi].recevoir(self.tapis.tirer())
                 #au prochain tour, ce sera au joueur suivant
                 servi = (servi + 1) % self.nb_joueurs
 
@@ -90,8 +93,12 @@ class Partie:
         affiche le tout
         puis affiche ("on démarre")
         '''
-
-        #à vous
+        self.paquet.battre()
+        self.paquet.couper()
+        self.distribuer()
+        for _ in range(4):
+            self.tapis.ajouter(self.paquet.tirer())
+        self.afficher()
 
 
 

@@ -20,6 +20,7 @@ class Carte:
         self.dessin = self.JEU_IMAGES[DICO_COULEURS[couleur]][DICO_HAUTEURS[hauteur]]
         #à compléter
         self.valeur = DICO_VALEURS[hauteur]
+        self.id=self.couleur+self.hauteur #on concatène les attributs couleur et hauteur
 
     def __str__(self):
         #permet de faire print facilement

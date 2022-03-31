@@ -35,9 +35,9 @@ class Tapis():
 
     def __repr__(self):
         if self.est_vide():
-            s="tapis vide"
+            s="Tapis vide"
         else:
-            s="tapis : "
+            s="Tapis : "
             repr_cartes = list(map(repr,self.contenu))
             s+=" + ".join(repr_cartes)
         return s

@@ -67,7 +67,13 @@ class Partie:
         for main in self.mains:
             print(main)
 
-
+    def __repr__(self):
+        s = ""
+        s += repr(self.tapis) + "\n"
+        s += "Mains : \n"
+        for main in self.mains:
+            s += repr(main) + "\n"
+        return s
 
     def distribuer(self):
         '''
@@ -78,7 +84,7 @@ class Partie:
         for _ in range(self.nb_par_joueur):
             for _ in range(self.nb_joueurs):
                 #on distribue une carte à ce joueur
-                self.mains[servi].recevoir(self.tapis.tirer())
+                self.mains[servi].recevoir(self.paquet.tirer())
                 #au prochain tour, ce sera au joueur suivant
                 servi = (servi + 1) % self.nb_joueurs
 
@@ -98,10 +104,7 @@ class Partie:
         self.distribuer()
         for _ in range(4):
             self.tapis.ajouter(self.paquet.tirer())
-        self.afficher()
-
-
-
+        print(self)
         print("on démarre")
 
 
@@ -111,14 +114,3 @@ class Partie:
 if __name__ == '__main__':
     test = Partie()
     test.start()
-
-
-
-
-
-
-
-
-
-
-

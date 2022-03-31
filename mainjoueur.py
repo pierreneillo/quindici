@@ -34,6 +34,12 @@ class MainJoueur:
         for carte in self.cartes:
             print(carte)
 
+    def __repr__(self):
+        s = ""
+        self.cartes.sort(key=lambda carte:carte.valeur)
+        for carte in self.cartes:
+            s += repr(carte)
+        return s
 
     def recevoir(self,carte):
         """prend en paramètre une carte et l'insère dans le jeu"""
@@ -91,8 +97,7 @@ class MainJoueur:
 
 #tests
 if __name__=='__main__':
-
-
+    pass
 
 
 

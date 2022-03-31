@@ -93,9 +93,29 @@ class MainJoueur:
             return choisie
 
 
+class MainJoueurIA(MainJoueur):
+    def __init__(self,cartes,position='N'):
+        super().__init__(self,cartes,position)
+
+
+
+    def score(carte):
+        pass
+
+    def choix_output():
+        """récupère le choix du joueur par input texte(= str id_cartes), si le joueur fait une erreur on recommence (pas indéfinimment grâce à l'ajout d'un compteur) """
+        return random.choice(self.cartes)
+
+
+
+
 
 #tests
 if __name__=='__main__':
+
+
+    #tests MainJoueur
+
     #tests constructeur
     j1=MainJoueur([Carte('c','K'),Carte('d','5'),Carte('h','1')],'S')
     j2=MainJoueur([],'N')
@@ -118,7 +138,7 @@ if __name__=='__main__':
     j2.ajoute_plis(PaquetCartes(40).cartes)
     print(j1.plis)
     print(j2.plis)
-    print(j1.choix_output())#ok
+    print(j1.choix_output())
     j1.afficher()
 
 

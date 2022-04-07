@@ -1,4 +1,5 @@
 from cartes_paquet import *
+from tapis import *
 
 
 class MainJoueur:
@@ -27,6 +28,10 @@ class MainJoueur:
         """Renvoie True si la main cartes est vide false sinon"""
         return self.cartes==[] or self.cartes is None
 
+    def trier_main(self):
+        '''trie l'attribut cartes par ordre croissant de valeur des cartes'''
+        self.cartes.sort(key=lambda carte:carte.valeur)
+
 
     def afficher(self):
         """affiche le jeu trié par valeur de cartes"""
@@ -34,9 +39,13 @@ class MainJoueur:
             print('la main est vide')
         else:
             reponse=''
-            self.cartes.sort(key=lambda carte:carte.valeur)
-            for carte in self.cartes:
-                reponse+=str(carte)+'-'
+            self.trier_main()
+
+            for i in range(len(self.cartes)):
+                reponse+=str(self.cartes[i])
+                if i!=len(self.cartes)-1:
+                    reponse+='-'
+
             print(reponse)
 
 
@@ -52,6 +61,7 @@ class MainJoueur:
         renvoie la carte supprimée"""
         #on vérifie que la carte est présente dans le paquet
         present=False
+
         for carte in self.cartes:
             if carte.id==id_carte:
                 present=True
@@ -80,8 +90,8 @@ class MainJoueur:
         compteur=0
         while not(present) and compteur!=5:
             compteur+=1
-            id_carte=input('saisissez l\'identifaint de la carte : ')
-            id_carte.lower()
+            id_carte=input('saisissez l\'identifiant de la carte : ').lower()
+
             #on vérifie que la carte est présente dans le paquet
             for carte in self.cartes:
                 if carte.id.lower()==id_carte:
@@ -95,14 +105,43 @@ class MainJoueur:
 
 class MainJoueurIA(MainJoueur):
     def __init__(self,cartes,position='N'):
-        super().__init__(self,cartes,position)
+        super().__init__(cartes,position)
 
 
 
-    def score(carte):
-        pass
+    def score(self,carte):
+        '''quantifie l'intérêt de jouer la carte en paramètre,renvoie un nombre entre 0 et 1 '''
+        assert type(carte)==Carte,"l'objet en paramètre est une Carte"
 
-    def choix_output():
+
+        if carte.valeur>7:
+            if carte.couleur=='d':#carte est J,Q,K de carreau (intéressante à jouer car carreau raporte un point à la fin mais comme la valeur est grande on a moins de possibilité de vider le tapis)
+                score=0.25
+
+            else:#carte est J,G,K de trèfle, pique, coeur : valeur trop grande et rapporte aucun point à la fin donc 0
+                score=0
+
+
+
+        elif carte.valeur<7:
+            if carte.couleur=='d':#carte est 1,2,3,4,5,6 de carreau : valeur petite, pour avoir une somme de 15 on va ramasser plus de cartes=>chance importante de vider tapis + 1 point à la fin car carreau
+                score=0.75
+
+
+            else:#1,2,3,4,5,6 de trèfle coeur et pique (on va pouvoir ramasser beaucoup de cartes voire vider le tapis)
+                score=0.5
+
+        else:#carte.valeur==7
+            if carte.couleur=='d':#carte est 7 de carreaux : très intéressant à jouer car rapporte 1+1 point à la fin
+                score=1
+            else:#carte est 7 de trèfle coeur pique
+                score=0.76
+
+
+        return score
+
+
+    def choix_output(self):
         """récupère le choix du joueur par input texte(= str id_cartes), si le joueur fait une erreur on recommence (pas indéfinimment grâce à l'ajout d'un compteur) """
         return random.choice(self.cartes)
 
@@ -115,9 +154,9 @@ if __name__=='__main__':
 
 
     #tests MainJoueur
-
+    print('début des tests pour MainJoueur')
     #tests constructeur
-    j1=MainJoueur([Carte('c','K'),Carte('d','5'),Carte('h','1')],'S')
+    j1=MainJoueur([Carte('c','Q'),Carte('d','5'),Carte('h','1')],'S')
     j2=MainJoueur([],'N')
 
     assert not(j1.est_vide())#est_vide() ok
@@ -138,8 +177,15 @@ if __name__=='__main__':
     j2.ajoute_plis(PaquetCartes(40).cartes)
     print(j1.plis)
     print(j2.plis)
-    print(j1.choix_output())
+    print('test choix output',j1.choix_output())
     j1.afficher()
+
+
+    print('Début des tests pour MainJoueurIA')
+    j3=MainJoueurIA([Carte('h','Q'),Carte('c','7'),Carte('d','1')],'N')
+    print(j3.choix_output())
+    j3.score(Carte('h','Q'))
+
 
 
 

@@ -1,6 +1,6 @@
 import random
 from cartes_paquet import Carte, PaquetCartes
-from mainjoueur import MainJoueur
+from mainjoueur import MainJoueur,MainJoueurIA
 from tapis import Tapis
 from constantes import *
 
@@ -56,6 +56,8 @@ class Partie:
         # vides au départ !
         #à vous
         self.mains = [MainJoueur([],POSITIONS[self.nb_joueurs][i]) for i in range(self.nb_joueurs)]
+        if self.nb_joueurs==2:
+            self.mains = [self.mains[0],MainJoueurIA([],POSITIONS[2][1])]
 
 
     def afficher(self):
@@ -116,13 +118,14 @@ class Partie:
         '''
         self.start()
         #Pour l'instant le joueur commence dans tous les cas
-        while sum([int(main.est_vide()) for main in self.mains])!=0:#Si au moins une main contient encore des cartes
+        while sum([int(not main.est_vide()) for main in self.mains])!=0:#Si au moins une main contient encore des cartes
             #1 tour de boucle = 1 tour de jeu
             #A 2 joueurs, le 'vrai' joueur est au Sud, soit à la position 0
             #---------------------------Le 'vrai' joueur joue------------------------------------
-            print("Votre jeu :",self.mains[0])
+            print("Votre jeu :")#,self.mains[0])
+            self.mains[0].afficher()
             print(self.tapis)
-            id_carte_a_jouer = self.mains[0].choix_output()
+            id_carte_a_jouer = self.mains[0].choix_output().id
             carte_jouee = self.mains[0].rejeter(id_carte_a_jouer)
             self.tapis.ajouter(carte_jouee)
             print(f"Vous avez joué {carte_jouee}")
@@ -131,17 +134,17 @@ class Partie:
                 if self.tapis.scopa:
                     print("Scopa! Vous ramassez toutes les cartes")
                 else:
-                    print("Quindici! Vous ramassez les cartes :", "-".join(combi_opt))
+                    print("Quindici! Vous ramassez les cartes :", "-".join([str(c) for c in combi_opt]))
                 self.mains[0].ajoute_plis(combi_opt)
                 for carte in combi_opt:
                     self.tapis.enlever(carte.id)
             else:
                 print("Dommage :( vous n'avez rien ramassé cette fois-ci...")
-            
+
             print(self.tapis)
             #---------------------------------L'IA joue----------------------------------------
-            id_carte_a_jouerIA = self.mains[0].choix_output()
-            carte_joueeIA = self.mains[0].rejeter(id_carte_a_jouerIA)
+            id_carte_a_jouerIA = self.mains[1].choix_output().id
+            carte_joueeIA = self.mains[1].rejeter(id_carte_a_jouerIA)
             self.tapis.ajouter(carte_joueeIA)
             print(f"L'IA a joué {carte_joueeIA}")
             quindici,combi_opt = self.tapis.tester_quindici()
@@ -149,21 +152,22 @@ class Partie:
                 if self.tapis.scopa:
                     print("Scopa! L'IA ramasse toutes les cartes")
                 else:
-                    print("Quindici! L'IA ramasse les cartes :", "-".join(combi_opt))
-                self.mains[0].ajoute_plis(combi_opt)
+                    print("Quindici! L'IA ramasse les cartes :", "-".join([str(c) for c in combi_opt]))
+                self.mains[1].ajoute_plis(combi_opt)
                 for carte in combi_opt:
                     self.tapis.enlever(carte.id)
             else:
-                print("L'IA rien ramassé cette fois-ci...")
+                print("L'IA n'a rien ramassé cette fois-ci...")
             print(self.tapis)
-            
-            
-            
-        
+
+
+
+
 
 
 
 #test
 if __name__ == '__main__':
     test = Partie()
-    test.start()
+    #tests pour la fonction simul_jeu()
+    test.simul_jeu()

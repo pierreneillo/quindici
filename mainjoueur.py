@@ -63,7 +63,7 @@ class MainJoueur:
         present=False
 
         for carte in self.cartes:
-            if carte.id==id_carte:
+            if carte.id.lower()==id_carte.lower():
                 present=True
                 supprimee=carte
         assert present,'la carte cherchée n\'est pas dans le paquet'
@@ -94,6 +94,7 @@ class MainJoueur:
 
             #on vérifie que la carte est présente dans le paquet
             for carte in self.cartes:
+                print(carte.id.lower(),id_carte)
                 if carte.id.lower()==id_carte:
                     present=True
                     choisie=carte
@@ -111,6 +112,7 @@ class MainJoueurIA(MainJoueur):
 
     def score(self,carte):
         '''quantifie l'intérêt de jouer la carte en paramètre,renvoie un nombre entre 0 et 1 '''
+        #vouée à évoluer en score(self,carte,tapis)
         assert type(carte)==Carte,"l'objet en paramètre est une Carte"
 
 
@@ -143,7 +145,11 @@ class MainJoueurIA(MainJoueur):
 
     def choix_output(self):
         """récupère le choix du joueur par input texte(= str id_cartes), si le joueur fait une erreur on recommence (pas indéfinimment grâce à l'ajout d'un compteur) """
-        return random.choice(self.cartes)
+        #print(self.cartes)
+        self.cartes.sort(key=lambda x:self.score(x))
+        #print(self.cartes)
+        return self.cartes[-1]#on retourne la dernière carte:score le plus élevé
+
 
 
 
@@ -177,14 +183,18 @@ if __name__=='__main__':
     j2.ajoute_plis(PaquetCartes(40).cartes)
     print(j1.plis)
     print(j2.plis)
+    j1.afficher()
     print('test choix output',j1.choix_output())
     j1.afficher()
 
-
+    #tests MainJoueurIA
+    print()
     print('Début des tests pour MainJoueurIA')
     j3=MainJoueurIA([Carte('h','Q'),Carte('c','7'),Carte('d','1')],'N')
     print(j3.choix_output())
-    j3.score(Carte('h','Q'))
+    assert j3.score(Carte('h','Q'))==0
+    assert j3.score(Carte('d','7'))==1
+    assert j3.score(Carte('c','1'))==0.5
 
 
 

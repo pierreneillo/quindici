@@ -50,7 +50,7 @@ POSITIONS = '', 'S', 'SN', 'SEN', 'SENO'
 
 
 
-VALUE_ERROR = 'nb_joueurs doit être entre 2 et 4, nb_cartes est égal à 32 ou à 52, ou à 40'
+VALUE_ERROR = 'nb_joueurs doit être entre 2 et 4, nb_cartes égal à 40'
 
 DISTANCE = 400
 

@@ -1,9 +1,13 @@
 import random
 from constantes import *
 
+__about__ = """Module cartes_paquet.py: implémente les classes Carte et PaquetCartes, servant respectivement à représenter une carte de jeu et un paquet de cartes"""
+
 
 class Carte:
-    #variables de classe : correspondance hauteurs et couleurs
+    """
+    Classe représentant une carte de jeu
+    """
     #on récupère les dessins Unicode des cartes (sauf le cavalier)
     JEU_IMAGES = [[chr(127184 - c*16 + h + 1 + (h > 12)) for h in range(13)] for c in range(4)]
 
@@ -18,31 +22,33 @@ class Carte:
         self.couleur = couleur
         self.hauteur = hauteur
         self.dessin = self.JEU_IMAGES[DICO_COULEURS[couleur]][DICO_HAUTEURS[hauteur]]
-        #à compléter
         self.valeur = DICO_VALEURS[hauteur]
         self.id=self.couleur+self.hauteur #on concatène les attributs couleur et hauteur
 
     def __str__(self):
-        #permet de faire print facilement
         return self.couleur+self.hauteur + ' ' + self.dessin
+    
     def __repr__(self):
         return self.couleur+self.hauteur + ' ' + self.dessin
 
 
 class PaquetCartes:
+    """Représente le paquet de carte utilisé pour le jeu"""
     def __init__(self, nb):
         '''
-        @nb: le nombre de cartes dans le paquet
+        @nb_cartes: le nombre de cartes dans le paquet
         @cartes: Un tableau dynamique python contenant des instances de la classe Carte, représente le paquet de cartes
         '''
         self.nb_cartes = nb
         if nb!=40:
+            raise ValueError(VALUE_ERROR)
+            """
             hauteur_min = 0 if nb == 52 else 6 #on commence au 7 pour un jeu de 32
-            self.cartes = [Carte(couleur, hauteur) for hauteur in HAUTEURS[hauteur_min:]
-                                           for couleur in COULEURS]
+            self.cartes = [Carte(couleur, hauteur) for hauteur in HAUTEURS[hauteur_min:] for couleur in COULEURS]
             if nb ==32:
                 #il faut rajouter l'As
                 self.cartes.extend([Carte(couleur, '1') for couleur in COULEURS])
+            """
         if nb == 40:
             #Jeu de scopa
             self.cartes = [Carte(couleur, hauteur) for hauteur in HAUTEURS_SCOPA for couleur in COULEURS]
@@ -52,11 +58,11 @@ class PaquetCartes:
         '''
         mélange le paquet de façon aléatoire
         '''
-        random.shuffle(self.cartes)
+        random.shuffle(self.cartes)#Mélange la liste en place
 
     def couper(self):
         '''
-        simule le fait de couper le paquet en deux à un endroit aléatoire
+        Simule le fait de couper le paquet en deux à un endroit aléatoire
         puis de permuter les deux parties "dessus - dessous"
         '''
         i_coupe = random.randint(0,len(self.cartes)-1)
@@ -65,12 +71,15 @@ class PaquetCartes:
         self.cartes = dessus + dessous
 
     def est_vide(self):
+        '''
+        Renvoie un booléen, qui représente le fait que le paquet de cartes soit vide
+        '''
         return len(self.cartes)==0
 
     def remplir(self, cartes):
         '''
         @cartes est une liste d'objets Carte
-        cette méthode ajoute les cartes en question au paquet
+        Cette méthode ajoute les cartes en question au paquet
         '''
         #Dans la deuxième condition, on teste si tous les éléments de la liste sont de la classe Carte.
         #Pour cela, on crée une chaîne de caractères composée de 1 et de 0, ou chaque 1 représente un élément
@@ -87,7 +96,7 @@ class PaquetCartes:
         si le paquet est vide, lève une exception
         '''
         if self.est_vide():
-            raise IndexError("stack is empty")
+            raise IndexError("Stack is empty")
         else:
             return self.cartes.pop()
 

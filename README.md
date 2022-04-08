@@ -14,6 +14,6 @@ The aim of this project is to code a quindici game with an IA playing against th
     <a href="https://drive.google.com/file/d/1ix7YluiG6QmuKMf30qPVMtyEXi1E1sUK/view?usp=sharing" target="_blank">class diagram</a>
   </li>
   <li>
-    <a href="https://trello.com/b/N7dEHWvi/tableaudesuivispoca" target="_blank">tracking table</a>
+    <a href="https://trello.com/b/N7dEHWvi/tableaudesuiviscopa" target="_blank">tracking table</a>
   </li>
 </ul>

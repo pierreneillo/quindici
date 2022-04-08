@@ -49,7 +49,7 @@ class Partie:
 
         self.nb_joueurs = nb_joueurs
         self.donneur = 0
-
+        self.nb_cartes = nb_cartes
         self.nb_par_joueur = nb_par_joueur
 
         #création des mains des joueurs
@@ -71,6 +71,9 @@ class Partie:
             print(main)
 
     def __repr__(self):
+        '''
+        Renvoie une chaîne représentant le tapis et les mains
+        '''
         s = ""
         s += repr(self.tapis) + "\n"
         s += "Mains : \n"
@@ -80,7 +83,7 @@ class Partie:
 
     def distribuer(self):
         '''
-        remplit les listes de cartes des mains pour chaque joueur
+        Remplit les listes de cartes des mains pour chaque joueur
         '''
         servi = (self.donneur + 1) % self.nb_joueurs
         #servi est l'indice du joueur à qui donner une carte

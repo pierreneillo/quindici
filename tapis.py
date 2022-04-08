@@ -1,15 +1,9 @@
-import random
-from cartes_paquet import Carte, PaquetCartes
+from cartes_paquet import *
 import itertools
 
-def affiche_jeu(liste_cartes):
-    for carte in liste_cartes:
-        print(carte, end = '+')
-    print()
+__about__ = """Module tapis.py: Implémente la classe tapis, qui représente l'endroit où sont posées les cartes"""
 
-
-## c'est le tapis où les joueurs posent une carte chacun leur tour
-class Tapis():
+class Tapis:
     def __init__(self):
         '''
         @contenu : liste d'objets cartes
@@ -25,11 +19,9 @@ class Tapis():
     def est_vide(self):
         return len(self.contenu)==0
 
-
-
     def changer_joueur(self, position):
         '''
-        position est un str dans la chaîne 'SONE'
+        @position: un str dans la chaîne 'SONE'
         '''
         self.joueur_actuel = position
 
@@ -42,13 +34,9 @@ class Tapis():
             s+=" + ".join(repr_cartes)
         return s
 
-
-
     def ajouter(self, carte):
         '''ajoute la carte au contenu du tapis'''
         self.contenu.append(carte)
-
-
 
     def enlever(self, id_carte):
         '''
@@ -62,9 +50,6 @@ class Tapis():
             raise ValueError("La carte n'est pas sur le tapis")
         self.contenu.pop(id_contenu.index(id_carte))
 
-
-
-
     def tester_quindici(self):
         '''
         c'est la "grosse méthode" du tapis
@@ -76,29 +61,31 @@ class Tapis():
         (on pourrait aussi traiter à part le 7 de carreaux...)
         Cette méthode actualise l'attribut scopa
         '''
-        #TODO: comment all the code of this method
-        self.quindici = False
+        self.quindici = False#On remet quinidici à False, et on le passera à True s'il y a un quindici
         combinaisons_possibles = []
         for i in range(1, len(self.contenu)+1):
-            combinaisons_possibles.extend(list(itertools.combinations(self.contenu,i)))
+            combinaisons_possibles.extend(list(itertools.combinations(self.contenu,i)))#liste des toutes les combinaisons possibles, pas mnécessairement de 15 points
         combinaisons_possibles = [combinaison for combinaison in combinaisons_possibles if sum([x.valeur for x in combinaison])==15]
+        #on "élague", pour ne garder que les combinaisons de 15 points
         combinaisons_possibles.sort(key=len, reverse=True)
-        if len(combinaisons_possibles)!=0:
-            self.quindici = True
-            combinaison_max_cartes = [combinaisons_possibles[0]]
-            max = len(combinaisons_possibles[0])
-            for i in range(len(combinaisons_possibles)):
+        #on trie la liste par nombre de cartes, car plus il y a de cartes, plus la combinaison est intéressante
+        if len(combinaisons_possibles)!=0:#Si il y a des combinaisons de 15 points, il y a quindici
+            self.quindici = True#on passe donc quindici à True
+            combinaison_max_cartes = [combinaisons_possibles[0]]#on sélectionne la combinaison avec le plus de cartes
+            max = len(combinaisons_possibles[0])#Longueur maximale de combinaison trouvée
+            for i in range(len(combinaisons_possibles)):#On vérifie si il n'y a pas d'autres combinaisons de cartes du même nombre de cartes
                 if len(combinaisons_possibles[i])==max:
                     combinaison_max_cartes.append(combinaisons_possibles[i])
                 else:
                     break
-            combinaison_max_cartes.sort(key = lambda x:len([y for y in x if y.couleur == 'd']))
-            combinaison_optimale = combinaison_max_cartes[-1]
+            combinaison_max_cartes.sort(key = lambda x:len([y for y in x if y.couleur == 'd']))#on trie les combinaisons ayant un nombre maximal de cartes par nombre de carreaux
+            combinaison_optimale = combinaison_max_cartes[-1]#Et la combinaison optimale est celle qui en a le plus.
+            #TODO: Affiner pour prendre en compte les 7 aussi, et pour mettre un pénalité si on laisse une combinaison à l'adversaire
             if len(combinaison_optimale) == len(self.contenu):
-                self.scopa = True
+                self.scopa = True#Si on a pris toutes les cartes du tapis, il y a scopa
             else:
-                self.scopa = False
-        else:
+                self.scopa = False#Sinon, non
+        else:#Si la longueur de combinaisons possibles est de 0, il n'y a pas quindici
             combinaison_optimale = []
         return self.quindici, combinaison_optimale
 

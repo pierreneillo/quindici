@@ -21,7 +21,7 @@ class Carte:
         '''
         self.couleur = couleur
         self.hauteur = hauteur
-        self.dessin = self.JEU_IMAGES[DICO_COULEURS[couleur]][DICO_HAUTEURS[hauteur]]
+        self.dessin = self.JEU_IMAGES[DICO_COULEURS[couleur]][DICO_HAUTEURS_SCOPA[hauteur]]
         self.valeur = DICO_VALEURS[hauteur]
         self.id=self.couleur+self.hauteur #on concatène les attributs couleur et hauteur
 

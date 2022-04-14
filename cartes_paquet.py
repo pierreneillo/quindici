@@ -11,19 +11,25 @@ class Carte:
     #on récupère les dessins Unicode des cartes (sauf le cavalier)
     JEU_IMAGES = [[chr(127184 - c*16 + h + 1 + (h > 12)) for h in range(13)] for c in range(4)]
 
-    def __init__(self, couleur, hauteur):
+       def __init__(self, couleur, hauteur):
         '''
         @hauteur est un str de '1' pour l'As à 'K' pour le roi
         @couleur est un str entre 'c', 'd', 'h', 's'
         @valeur est un entier correspondant à la force de la carte
          : 1 pour la plus faible (1) à 10 pour le Roi
         @dessin est un caractère Unicode représentant la carte en miniature
+        @id est un str composé de la couleur de la carte et de sa hauteur
+        @valeur2 est un flottant égal à la valeur de l carte -0.1 si la carte est carreau égal à la valeur de la carte sinon; utile pour l'IA
         '''
         self.couleur = couleur
         self.hauteur = hauteur
         self.dessin = self.JEU_IMAGES[DICO_COULEURS[couleur]][DICO_HAUTEURS_SCOPA[hauteur]]
         self.valeur = DICO_VALEURS[hauteur]
         self.id=self.couleur+self.hauteur #on concatène les attributs couleur et hauteur
+        if self.couleur=='d':
+            self.valeur2=float(self.valeur)-0.1
+        else:
+            self.valeur2=self.valeur
 
     def __str__(self):
         return self.couleur+self.hauteur + ' ' + self.dessin

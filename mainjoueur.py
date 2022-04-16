@@ -105,6 +105,7 @@ class MainJoueur:
 
 
 class MainJoueurIA(MainJoueur):
+    """décrit le jeu de l'IA et toutes ses actions possibles"""
     def __init__(self,cartes,position='N'):
         super().__init__(cartes,position)
 
@@ -145,7 +146,9 @@ class MainJoueurIA(MainJoueur):
 
     def choix_output(self,tapis):
         """prend en paramètre le tapis de jeu pour permettre à l'IA de choisir sa carte à jouer dans le but de marquer plus de points, retourne la carte choisie par l'IA """
+        assert not(self.est_vide()),"l'IA n'a plus de cartes en main"
         assert type(tapis)==Tapis,"l'objet en paramètre n'est pas un tapis"
+        assert not(tapis.est_vide()),"le tapis est vide"
         valeur_introuvables=[]#va stocker les valeurs cherchées pour lesquelles il n'y a pas de combinaison possible, afin d'éviter de perdre du temps et de les rechercher après
         resultat=[]#stoke les différentes combiaisons possibles
         contenu_tapis=tapis.contenu

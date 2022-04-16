@@ -161,7 +161,7 @@ class MainJoueurIA(MainJoueur):
             valeur_a_chercher=15-carte.valeur
             if valeur_a_chercher not in valeurs_introuvables:
                 combinaisons=self.chercheValeur(valeur_a_chercher,contenu_tapis)#on cherche le 'reste' de la combinaison de 15 points si ce reste n'est pas déjà marqué introuvable
-                if combinaisons[0]!=[]:
+                if combinaisons[0]!=[]:#s'il n'y a pas de combinaisons, combi==[ [] ]
                     #print("combi= ",combinaisons,"vérifier si les cartes sont bien dans le tapis = ",tapis)
                     for combinaison in combinaisons:#on ajoute la carte de la main à toutes les combinaisons trouvées
                         combinaison.append(carte)
@@ -246,6 +246,7 @@ class MainJoueurIA(MainJoueur):
             #print("somme = ",somme)
             for indice in groupe_indices:
                 carte=contenu_tapis[indice]#contenu_tapis[indice] est une carte
+                assert type(carte)==Carte,"l'objet étudié n'est pas un objt carte"
                 #print(carte)
                 somme+=carte.valeur
                 #print("somme = ",somme)
@@ -256,7 +257,7 @@ class MainJoueurIA(MainJoueur):
                 resultat_modifie=True
                 #print('resultat= ',resultat)
         if not(resultat_modifie):
-            return [[]]#resultat étant une liste de combinaisons, pour garder cette structure on renvoie une liste composée d'une liste vide
+            return [[]]#resultat étant une liste de combinaisons, pour garder cette structure on renvoie une lise composée d'une liste vide
         else:
             return resultat
 
@@ -287,23 +288,28 @@ if __name__=='__main__':
     assert j2.est_vide()
     j1.afficher()#afficher ok
     j2.afficher()
+    print("+++++afficher ok+++++")
     j1.recevoir(Carte('d','4'))#recevoir ok
     j2.recevoir(Carte('d','2'))
     j1.afficher()
     j2.afficher()
+    print("+++++recevoir ok+++++")
     j1.rejeter('h1')#rejeter ok
     j2.rejeter('d2')
     j1.afficher()
     j2.afficher()
+    print("+++++rejeter ok+++++")
     print(j1.plis)
     print(j2.plis)
     j1.ajoute_plis(PaquetCartes(40).cartes)#ajoute_plis ok
     j2.ajoute_plis(PaquetCartes(40).cartes)
     print(j1.plis)
     print(j2.plis)
+    print("+++++ajoute_plis ok+++++")
     j1.afficher()
-    #print('test choix output',j1.choix_output())
+    print('test choix output',j1.choix_output())
     j1.afficher()
+    print("+++++choix_output ok+++++")
 
 
 

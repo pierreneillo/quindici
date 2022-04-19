@@ -154,11 +154,12 @@ class MainJoueurIA(MainJoueur):
         resultat=[]#stoke les différentes combinaisons possibles
         contenu_tapis=tapis.contenu
         assert type(contenu_tapis)==list ,"le contenu du tapis n'est pas une liste"
-        assert not(tapis.est_vide()),"le tapis est vide"
         #print('ligen 153 tapis avant tri : ',contenu_tapis)
         contenu_tapis=trier(contenu_tapis)#on trie le tapis par valeurs croissantes et les carreaux en avant
         #print('ligne 155 tapis après tri :',contenu_tapis)
         #print("ma main est : ",self.cartes)
+        #
+        #
         #++++++++++corps de la fonction : constitution de toutes les combinaisons possibles avec les cartes de la main++++++++++
         for carte in self.cartes:
             assert type(carte)==Carte,"la carte étudiée n'est pas un objet Carte"
@@ -176,21 +177,46 @@ class MainJoueurIA(MainJoueur):
                 else:#si on entre ici, il n'y a pas de combinaisons possibles pour la valeur cherchée donc elle est marquée introuvable pour éviter de la rechercher
                     valeurs_introuvables.append(valeur_a_chercher)
                     combinaisons.append(carte)
-                    resultat.append(combinaisons#il n'y a pas de combinaisons pour la carte étudiée donc on rajoute à resultat la liste [None, carte étudiée]
+                    resultat.append(combinaisons)#il n'y a pas de combinaisons pour la carte étudiée donc on rajoute à resultat la liste [None, carte étudiée]
         #print("resultat= ",resultat)
+        #
+        #
         #++++++++++détermination de la carte choisie++++++++++
         #on va chercher la combinaison de score maximum parmi toutes celles recueillies
         taille_tapis=len(contenu_tapis)#on prend en compte la taille du tapis afin de savoir si on fait scopa dans score
-        maxi=resultat[0]
+        carte_choisie=self.choisitCarte(resultat,taille_tapis)
+        #print("la carte choisie est : ",carte_choisie,self.cartes)
+        assert carte_choisie in self.cartes or carte_choisie is None,"la carte choisie n'est pas dans la main de l'IA ou n'est pas None"
+        return carte_choisie
+
+
+
+
+    def choisitCarte(self,l_combi,taille_tapis):
+        """prend en paramètre une liste de combinaisons et la taille du tapis en cours d'utilisation et renvoie une carte ou None"""
+        assert type(l_combi)==list,"l_combi doit être une liste"
+        assert type(taille_tapis)==int and taille_tapis>0 and taille_tapis<=4, "la taille du tapis est un entier dans ]0;4]"
+        maxi=l_combi[0]
         score_maxi=self.score_combinaison(maxi,taille_tapis)
-        for combinaison in resultat:
-            print(f"score {combinaison[-1]}= {self.score_combinaison(combinaison,taille_tapis)} ")
-            if score_maxi<self.score_combinaison(combinaison,taille_tapis):
+        for combinaison in l_combi:
+            assert type(combinaison)==list,"la combinaison doit être une liste"
+            #
+            #décommenter la ligne qui suit pour faire apparaître les scores des cartes
+            #print(f"score {combinaison[-1]}= {self.score_combinaison(combinaison,taille_tapis)} ")
+            if score_maxi<self.score_combinaison(combinaison,taille_tapis):#si le score de la combi est plus élevé que le score maxi => la combinaison maxi devient la combinaison étudiée
+                #print("score_maxi<self.score_combinaison(combinaison,taille_tapis)")
                 maxi=combinaison
                 score_maxi=self.score_combinaison(combinaison,taille_tapis)
-            elif score_maxi==self.score_combinaison(combinaison,taille_tapis) and len(maxi)<len(combinaison):
-                maxi=combinaison
-                score_maxi=self.score_combinaison(combinaison,taille_tapis)
+            elif score_maxi==self.score_combinaison(combinaison,taille_tapis):#si les scores sont égaux alors on va différencier en fonction de :
+                #print("score_maxi==self.score_combinaison(combinaison,taille_tapis)")
+                if self.carreau7_present(combinaison) and not(self.carreau7_present(maxi)) :#la présence du 7 de carreau dans la combi étudiée et pas dans la combi maximale
+                    #print("self.carreau7_present(combi)")
+                    maxi=combinaison
+                    score_maxi=self.score_combinaison(combinaison,taille_tapis)
+                elif len(maxi)<len(combinaison) and not(self.carreau7_present(maxi)):#la taille de la combi étudiée et l'absence du 7 de carreau dans la combinaison maximale
+                    #print("len(maxi)<len(combinaison) and not(self.carreau7_present(maxi))")
+                    maxi=combinaison
+                    score_maxi=self.score_combinaison(combinaison,taille_tapis)
         if None in maxi:
             choisie=None
         else:
@@ -199,20 +225,15 @@ class MainJoueurIA(MainJoueur):
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    def carreau7_present(self,combinaison):
+        """prend en paramètre une combinaison et renvoie true si le 7 de carreau s'y trouve, False sinon"""
+        assert type(combinaison)==list,"la combinaison en paramètre n'est pas une liste"
+        present=False
+        for carte in combinaison:
+            assert type(carte)==Carte or carte is None,"la combinaison n'est pas constituée d'objets Carte ou de None"
+            if carte is not None and carte.valeur==7 and carte.couleur=='d':
+                present=True
+        return present
 
 
 
@@ -405,7 +426,6 @@ if __name__=='__main__':
     tapis_j5_3=Tapis()
     tapis_j5_3.contenu=[Carte('h','1'),Carte('s','1')]
     choisie=j5.choix_output(tapis_j5_3)
-    print(choisie)
     assert choisie==None
     print("ok")
     print("***** fin tests jeux 1*****\n*****tests jeux 2*****")
@@ -415,15 +435,17 @@ if __name__=='__main__':
     tapis_j6_1.contenu=[Carte('c','2'),Carte('s','2'),Carte('h','2'),Carte('h','J')]
     choisie=j6.choix_output(tapis_j6_1)
     assert choisie==j6.cartes[3]
-    print("ok\n+++++tapis 2 : aucune possibilité de jouer+++++")
-    #à continuer(jeu et tapis ok+dernier jeu=ts les rois + ts les 5
-
-
-
-
-
-
-
-
-
-
+    print("ok\n+++++tapis 2 : 2 combinaisons de même score mais privilégier 7 de carreau +++++")
+    tapis_j6_2=Tapis()
+    tapis_j6_2.contenu=[Carte('s','4'),Carte('h','4'),Carte('d','2'),Carte('s','5')]
+    choisie=j6.choix_output(tapis_j6_2)
+    assert choisie.valeur==7 and choisie.couleur=='d'
+    print("OK")
+    print("*****fin des tests jeux 2*****\n*****Dernier test mêlant scopa, 7 de carreau*****")
+    j7=MainJoueurIA([Carte('s','7'),Carte('c','7'),Carte('h','7'),Carte('d','7'),Carte('s','6'),Carte('d','5')])
+    tapis_j7=Tapis()
+    tapis_j7.contenu=[Carte('s','4'),Carte('h','4')]
+    choisie=j7.choix_output(tapis_j7)
+    assert choisie.valeur==7 and choisie.couleur=='d'
+    print('ok')
+    print("**********\nFin des tests pour MainJoueurIA\n**********")

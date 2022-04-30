@@ -1,124 +1,176 @@
-from cartes_paquet import *
-import itertools
+import random
+from cartes_paquet import Carte, PaquetCartes
+from mainjoueur import MainJoueur,MainJoueurIA
+from tapis import Tapis
+from constantes import *
 
-__about__ = """Module tapis.py: Implémente la classe tapis, qui représente l'endroit où sont posées les cartes"""
 
-class Tapis:
-    def __init__(self):
-        '''
-        @contenu : liste d'objets cartes
-        @joueur_actuel : str dans la chaîne SN : indique qui pose sa carte sur le tapis
-        @quindici : Booléen indiquant s'il existe une (ou plusieurs) combinaisons valant 15
-        @scopa : Booléen indiquant si la combinaison trouvée permet de vider le tapis
-        '''
-        self.contenu = []
-        self.quindici = False
-        self.scopa = False
-        self.joueur_actuel = ''
 
-    def est_vide(self):
-        return len(self.contenu)==0
 
-    def changer_joueur(self, position):
+
+
+## la classe principale (la plus haute) : prépare et lance la partie
+class Partie:
+    '''
+    Modélise une partie de Quindici
+    1 joueur contre 1 IA
+    Attributs
+    @nb_joueurs : int valant 2 par défaut
+    @nb_cartes : int valant 40 par défaut
+    @nb_par_joueur : int valant 6 par défaut
+    @paquet : un objet de la classe Paquet
+    @tapis : un objet de la classe Tapis
+    @mains : liste d'objets de type MainJoueur, représentant les joueurs
+    de la Partie (et leur jeu)
+    @donneur : int représentant l'indice du joueur qui va distribuer
+    dans la liste des mains
+
+    Méthodes
+    @afficher() : fait afficher les mains des joueurs et le tapis
+    @distribuer() : remplit les mains des joueurs avec les cartes du paquet
+    @start() : prépare tout pour le début du jeu
+    @simul_jeu() : simule une partie courte de jeu (1 tour)
+    ...
+
+    '''
+    def __init__(self, nb_joueurs=2, nb_cartes=40, nb_par_joueur=6):
+
+        #vérification de routine
+        if nb_joueurs < 1 or nb_joueurs > 4 or \
+        (nb_cartes != 32 and nb_cartes != 52 and nb_cartes != 40) or \
+         nb_par_joueur > nb_cartes // nb_joueurs:
+            raise ValueError(VALUE_ERROR)
+
+
+
+        #génération du paquet de carte pour le jeu
+        self.paquet = PaquetCartes(nb_cartes)
+        self.tapis = Tapis()
+
+        self.nb_joueurs = nb_joueurs
+        self.donneur = 0
+        self.nb_cartes = nb_cartes
+        self.nb_par_joueur = nb_par_joueur
+
+        #création des mains des joueurs
+        # vides au départ !
+        #à vous
+        self.mains = [MainJoueur([],POSITIONS[self.nb_joueurs][i]) for i in range(self.nb_joueurs)]
+        if self.nb_joueurs==2:
+            self.mains = [self.mains[0],MainJoueurIA([],POSITIONS[2][1])]
+
+
+    def afficher(self):
         '''
-        @position: un str dans la chaîne 'SONE'
+        affiche les jeux des joueurs
+        et le tapis
         '''
-        self.joueur_actuel = position
+        print("Tapis :",self.tapis)
+        print("Mains :")
+        for main in self.mains:
+            print(main)
 
     def __repr__(self):
-        if self.est_vide():
-            s="Tapis vide"
-        else:
-            s="Tapis : "
-            repr_cartes = list(map(repr,self.contenu))
-            s+=" + ".join(repr_cartes)
+        '''
+        Renvoie une chaîne représentant le tapis et les mains
+        '''
+        s = ""
+        s += repr(self.tapis) + "\n"
+        s += "Mains : \n"
+        for main in self.mains:
+            s += repr(main) + "\n"
         return s
 
-    def ajouter(self, carte):
-        '''ajoute la carte au contenu du tapis'''
-        self.contenu.append(carte)
+    def distribuer(self):
+        '''
+        Remplit les listes de cartes des mains pour chaque joueur
+        '''
+        servi = (self.donneur + 1) % self.nb_joueurs
+        #servi est l'indice du joueur à qui donner une carte
+        for _ in range(self.nb_par_joueur):
+            for _ in range(self.nb_joueurs):
+                #on distribue une carte à ce joueur
+                self.mains[servi].recevoir(self.paquet.tirer())
+                #au prochain tour, ce sera au joueur suivant
+                servi = (servi + 1) % self.nb_joueurs
 
-    def enlever(self, id_carte):
-        '''
-        enlève la carte de la liste contenu et la renvoie
-        id_carte est un str du type 'c7'
-        si on ne trouve pas la carte, on lève une exception type ValueError
-        '''
-        #First check if card is on the table:
-        id_contenu = list(map(lambda x:x.couleur+x.hauteur,self.contenu))
-        if id_carte not in id_contenu:
-            raise ValueError("La carte n'est pas sur le tapis")
-        self.contenu.pop(id_contenu.index(id_carte))
 
-    def tester_quindici(self):
+
+
+
+    def start(self):
         '''
-        c'est la "grosse méthode" du tapis
-        renvoie un tuple avec :
-        - Un booléen indiquant s'il existe une combinaison de cartes qui vaut 15
-        - et une liste, soit vide, soit contenant les cartes de la combinaison optimale
-        S'il y a plusieurs combinaisons valant 15... On prend celle avec le plus de cartes
-        et à égalité : celle où il y a le plus de carreaux
-        (on pourrait aussi traiter à part le 7 de carreaux...)
-        Cette méthode actualise l'attribut scopa
+        mélange le paquet, coupe, distribue les cartes
+        pose 4 cartes sur le tapis
+        n'affiche plus le tout car sinon le joueur voit le jeu de l'IA
+        puis affiche ("on démarre")
         '''
-        self.quindici = False#On remet quinidici à False, et on le passera à True s'il y a un quindici
-        combinaisons_possibles = []
-        for i in range(1, len(self.contenu)+1):
-            combinaisons_possibles.extend(list(itertools.combinations(self.contenu,i)))#liste des toutes les combinaisons possibles, pas mnécessairement de 15 points
-        combinaisons_possibles = [combinaison for combinaison in combinaisons_possibles if sum([x.valeur for x in combinaison])==15]
-        #on "élague", pour ne garder que les combinaisons de 15 points
-        combinaisons_possibles.sort(key=len, reverse=True)
-        #on trie la liste par nombre de cartes, car plus il y a de cartes, plus la combinaison est intéressante
-        if len(combinaisons_possibles)!=0:#Si il y a des combinaisons de 15 points, il y a quindici
-            self.quindici = True#on passe donc quindici à True
-            combinaison_max_cartes = [combinaisons_possibles[0]]#on sélectionne la combinaison avec le plus de cartes
-            max = len(combinaisons_possibles[0])#Longueur maximale de combinaison trouvée
-            for i in range(len(combinaisons_possibles)):#On vérifie si il n'y a pas d'autres combinaisons de cartes du même nombre de cartes
-                if len(combinaisons_possibles[i])==max:
-                    combinaison_max_cartes.append(combinaisons_possibles[i])
+        self.paquet.battre()
+        self.paquet.couper()
+        self.distribuer()
+        for _ in range(4):
+            self.tapis.ajouter(self.paquet.tirer())
+        #print(self) NE PAS DECOMMENTER, sinon le joueur verra le jeu de l'IA
+        print("on démarre")
+
+    def simul_jeu(self):
+        '''
+        Simule une partie (1 tour):
+            -Lance la partie
+            -Fait jouer le Joueur et l'IA tant que les deux jeux ne sont pas vides
+        '''
+        self.start()
+        #Pour l'instant le joueur commence dans tous les cas
+        while sum([int(not main.est_vide()) for main in self.mains])!=0:#Si au moins une main contient encore des cartes
+            #1 tour de boucle = 1 tour de jeu
+            #A 2 joueurs, le 'vrai' joueur est au Sud, soit à la position 0
+            #--------------Le 'vrai' joueur joue----------------
+            print("Votre jeu :")#,self.mains[0])
+            self.mains[0].afficher()
+            print(self.tapis)
+            id_carte_a_jouer = self.mains[0].choix_output().id
+            carte_jouee = self.mains[0].rejeter(id_carte_a_jouer)
+            self.tapis.ajouter(carte_jouee)
+            print(f"Vous avez joué {carte_jouee}")
+            quindici,combi_opt = self.tapis.tester_quindici()
+            if quindici:
+                if self.tapis.scopa:
+                    print("Scopa! Vous ramassez toutes les cartes")
                 else:
-                    break
-            combinaison_max_cartes.sort(key = lambda x:len([y for y in x if y.couleur == 'd']))#on trie les combinaisons ayant un nombre maximal de cartes par nombre de carreaux
-            combinaison_optimale = combinaison_max_cartes[-1]#Et la combinaison optimale est celle qui en a le plus.
-            #TODO: Affiner pour prendre en compte les 7 aussi, et pour mettre un pénalité si on laisse une combinaison à l'adversaire
-            if len(combinaison_optimale) == len(self.contenu):
-                self.scopa = True#Si on a pris toutes les cartes du tapis, il y a scopa
+                    print("Quindici! Vous ramassez les cartes :", "-".join([str(c) for c in combi_opt]))
+                self.mains[0].ajoute_plis(combi_opt)
+                for carte in combi_opt:
+                    self.tapis.enlever(carte.id)
             else:
-                self.scopa = False#Sinon, non
-        else:#Si la longueur de combinaisons possibles est de 0, il n'y a pas quindici
-            combinaison_optimale = []
-        return self.quindici, combinaison_optimale
+                print("Dommage :( vous n'avez rien ramassé cette fois-ci...")
+
+            print(self.tapis)
+            #-------------L'IA joue----------------
+            id_carte_a_jouerIA = self.mains[1].choix_output(self.tapis).id
+            carte_joueeIA = self.mains[1].rejeter(id_carte_a_jouerIA)
+            self.tapis.ajouter(carte_joueeIA)
+            print(f"L'IA a joué {carte_joueeIA}")
+            quindici,combi_opt = self.tapis.tester_quindici()
+            if quindici:
+                if self.tapis.scopa:
+                    print("Scopa! L'IA ramasse toutes les cartes")
+                else:
+                    print("Quindici! L'IA ramasse les cartes :", "-".join([str(c) for c in combi_opt]))
+                self.mains[1].ajoute_plis(combi_opt)
+                for carte in combi_opt:
+                    self.tapis.enlever(carte.id)
+            else:
+                print("L'IA n'a rien ramassé cette fois-ci...")
+            print(self.tapis)
+
+
+
+
+
 
 
 #test
 if __name__ == '__main__':
-    def tester(texte):
-        print(texte)
-        print(tapis)
-        print(tapis.tester_quindici())
-        print("Scopa :",tapis.scopa)
-        print()
-
-    #créer des objets de type Carte
-    l = [Carte('s','J'), Carte('h','3'), Carte('d','5'), Carte('c','4')]
-    tapis = Tapis()
-    tester("Cas classique#0: paquet vide")
-    for c in l:
-        tapis.ajouter(c)
-
-    tester("Cas classique#1: Une seule combinaison possible")
-
-    tapis.enlever('sJ')
-    tester("Cas classique#2: Aucune combinaison possible")
-
-    tapis.ajouter(Carte('s','J'))
-    tapis.enlever('d5')
-    tester("Cas classique#3: 1 scopa possible")
-
-    tapis.ajouter(Carte('s','7'))
-    tester("Cas Intermédiaire#4: Comparer 2 combinaisons possibles dont le nombre de cartes diffère")
-
-    tapis.enlever('s7')
-    tapis.ajouter(Carte('d','4'))
-    tapis.ajouter(Carte('d','3'))
-    tester("Cas intermédaire#5: Comparer plusieurs combinaisons possibles dont le nombre de carreaux diffère mais dont le nombre de cartes est le même")
+    test = Partie()
+    #tests pour la fonction simul_jeu()
+    test.simul_jeu()

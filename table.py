@@ -108,7 +108,8 @@ class Table:
                 hidd = True
             else:
                 hidd = False
-            self.affiche_cartes(m.position, m.cartes, hidd)
+            if not m.est_vide():
+                self.affiche_cartes(m.position, m.cartes, hidd)
 
 
         #le talon
@@ -140,7 +141,7 @@ if __name__ == '__main__':
     tapis.contenu=[Carte('s','2'),Carte('c','4'),Carte('h','J'),Carte('s','3')]
     table.mise_a_jour([j1,j2],tapis)
     table.clear()
-    
+    #print("clear passé")
     table.quitter()
 
 

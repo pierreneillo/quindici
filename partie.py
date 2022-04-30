@@ -3,6 +3,7 @@ from cartes_paquet import Carte, PaquetCartes
 from mainjoueur import MainJoueur,MainJoueurIA
 from tapis import Tapis
 from constantes import *
+from table import Table
 
 
 
@@ -24,7 +25,7 @@ class Partie:
     de la Partie (et leur jeu)
     @donneur : int représentant l'indice du joueur qui va distribuer
     dans la liste des mains
-
+    @table: l'objet de classe table dont on a besoin pour la représentation graphique
     Méthodes
     @afficher() : fait afficher les mains des joueurs et le tapis
     @distribuer() : remplit les mains des joueurs avec les cartes du paquet
@@ -58,6 +59,8 @@ class Partie:
         self.mains = [MainJoueur([],POSITIONS[self.nb_joueurs][i]) for i in range(self.nb_joueurs)]
         if self.nb_joueurs==2:
             self.mains = [self.mains[0],MainJoueurIA([],POSITIONS[2][1])]
+        #création de la table
+        self.table=Table(self.nb_joueurs)
 
 
     def afficher(self):
@@ -138,6 +141,8 @@ class Partie:
                     print("Scopa! Vous ramassez toutes les cartes")
                 else:
                     print("Quindici! Vous ramassez les cartes :", "-".join([str(c) for c in combi_opt]))
+                #print(list(combi_opt))
+                combi_opt=list(combi_opt)
                 self.mains[0].ajoute_plis(combi_opt)
                 for carte in combi_opt:
                     self.tapis.enlever(carte.id)
@@ -145,12 +150,14 @@ class Partie:
                 print("Dommage :( vous n'avez rien ramassé cette fois-ci...")
 
             print(self.tapis)
+            self.table.mise_a_jour(self.mains,self.tapis)
             #---------------------------------L'IA joue----------------------------------------
-            id_carte_a_jouerIA = self.mains[1].choix_output().id
+            id_carte_a_jouerIA = self.mains[1].choix_output(self.tapis).id
             carte_joueeIA = self.mains[1].rejeter(id_carte_a_jouerIA)
             self.tapis.ajouter(carte_joueeIA)
             print(f"L'IA a joué {carte_joueeIA}")
             quindici,combi_opt = self.tapis.tester_quindici()
+            combi_opt=list(combi_opt)
             if quindici:
                 if self.tapis.scopa:
                     print("Scopa! L'IA ramasse toutes les cartes")
@@ -162,6 +169,8 @@ class Partie:
             else:
                 print("L'IA n'a rien ramassé cette fois-ci...")
             print(self.tapis)
+            self.table.mise_a_jour(self.mains,self.tapis)
+        self.table.mise_a_jour(self.mains,self.tapis)
 
 
 
@@ -171,6 +180,8 @@ class Partie:
 
 #test
 if __name__ == '__main__':
+
     test = Partie()
     #tests pour la fonction simul_jeu()
     test.simul_jeu()
+

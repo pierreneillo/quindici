@@ -143,8 +143,57 @@ class MainJoueurIA(MainJoueur):
 
         return score
 
-
     def choix_output(self,tapis):
+        """Choisit quelle carte jouer pour l'IA
+        @param:
+          - @tapis: le tapis en cours
+        Renvoie une carte, celle à jouer pour obtenir le plus de points possibles"""
+        #Vérification de la validité du contexte
+        if len(self.cartes)==0:
+            raise IndexError("La main de l'IA est vide")
+        if type(tapis)!=Tapis:
+            raise ValueError("L'objet en paramètre n'est pas un Tapis")
+        #On commence par créer un nouvel objet Tapis, le duplicata de celui passé en paramètre, qu'on pourra modifier à notre guise
+        tapis_modif = Tapis()
+        tapis_modif.contenu = tapis.contenu[:]
+        meilleure_carte = self.cartes[0]
+        combi_meilleure_carte = None
+        for carte in self.cartes:
+            #On ajoute successivement chaque carte au tapis et on regarde quelle est la meilleure combinaison
+            tapis_modif.ajouter(carte)
+            quindici,combinaison_optimale = tapis_modif.tester_quindici()
+            #La qualité du jeu de l'IA dépend uniquement de la fonction comparer
+            if quindici and self.comparer(combi_meilleure_carte,combinaison_optimale):
+                combi_meilleure_carte = combinaison_optimale
+                meilleure_carte = carte
+            tapis_modif.enlever(carte.id)
+        if combi_meilleure_carte is None:
+            self.cartes.sort(key = lambda x: x.valeur)
+            return self.cartes[0]
+        else:
+            return meilleure_carte
+
+    def comparer(self,combi1,combi2):
+        """Compare deux combinaisons et renvoie True si la deuxième est meilleure que la première, False sinon
+        @param:
+          - @combi1: combinaison de cartes
+          - @combi2: combinaison de cartes"""
+        if combi1 is None: return True
+        if combi2 == []: return False
+        if len(combi1)!=len(combi2): return len(combi1)<len(combi2)
+        #On calcule le nombre de carreaux dans chaque combinaison
+        nb_carreaux_1=len([carte for carte in combi1 if carte.couleur=="d"])
+        nb_carreaux_2=len([carte for carte in combi1 if carte.couleur=="d"])
+        #On calcule le nombre de septs dans chaque combinaison
+        nb_septs_1=len([carte for carte in combi1 if carte.hauteur=="7"])
+        nb_septs_2=len([carte for carte in combi1 if carte.hauteur=="7"])
+        #On calcule le score de chaque combinaison en fonction de ces deux critères
+        score_1 = 0.2*nb_carreaux_1+0.8*nb_septs_1
+        score_2 = 0.2*nb_carreaux_2+0.8*nb_septs_2
+        return score_1 < score_2
+
+
+    def choix_output_v1(self,tapis):
         """prend en paramètre le tapis de jeu pour permettre à l'IA de choisir sa carte à jouer dans le but de marquer plus de points, retourne la carte choisie par l'IA si elle peut jouer sinon None """
         #++++++++++tests sur les variables++++++++++
         assert not(self.est_vide()),"l'IA n'a plus de cartes en main"
@@ -240,7 +289,7 @@ class MainJoueurIA(MainJoueur):
     def score_combinaison(self,combinaison,taille_tapis):
         """prend en paramètres une combinaison de cartes et la taille du tapis en cours d'utilisation et retourne un score flottant entre 0 et 1 à la combinaison passée en paramètre"""
 
-        assert type(combinaison)==list,"la combinaison en paramètre n'est pas une liste ou n'est pas None"
+        assert type(combinaison)==list,"la combinaison en paramètre n'est pas une liste"
         assert taille_tapis>0 and taille_tapis<=4,"le taille du tapis n'est pas comprise entre 1 et 4 cartes"
         if None in combinaison: return 0
         score=len(combinaison)#minimum de score possible

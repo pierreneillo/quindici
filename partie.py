@@ -128,6 +128,7 @@ class Partie:
             #1 tour de boucle = 1 tour de jeu
             #A 2 joueurs, le 'vrai' joueur est au Sud, soit à la position 0
             #---------------------------Le 'vrai' joueur joue------------------------------------
+            self.table.mise_a_jour(self.mains,self.tapis)
             print("Votre jeu :")#,self.mains[0])
             self.mains[0].afficher()
             print(self.tapis)
@@ -150,7 +151,7 @@ class Partie:
                 print("Dommage :( vous n'avez rien ramassé cette fois-ci...")
 
             print(self.tapis)
-            self.table.mise_a_jour(self.mains,self.tapis)
+            self.table.mise_a_jour(self.mains,self.tapis,2)
             #---------------------------------L'IA joue----------------------------------------
             id_carte_a_jouerIA = self.mains[1].choix_output(self.tapis).id
             carte_joueeIA = self.mains[1].rejeter(id_carte_a_jouerIA)
@@ -169,8 +170,9 @@ class Partie:
             else:
                 print("L'IA n'a rien ramassé cette fois-ci...")
             print(self.tapis)
-            self.table.mise_a_jour(self.mains,self.tapis)
-        self.table.mise_a_jour(self.mains,self.tapis)
+            self.table.mise_a_jour(self.mains,self.tapis,2)
+        self.table.mise_a_jour(self.mains,self.tapis,2)
+        self.table.quitter()
 
 
 

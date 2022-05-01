@@ -94,7 +94,7 @@ class MainJoueur:
 
             #on vérifie que la carte est présente dans le paquet
             for carte in self.cartes:
-                print(carte.id.lower(),id_carte)
+                #print(carte.id.lower(),id_carte)
                 if carte.id.lower()==id_carte:
                     present=True
                     choisie=carte
@@ -143,6 +143,7 @@ class MainJoueurIA(MainJoueur):
 
         return score
 
+
     def choix_output(self,tapis):
         """Choisit quelle carte jouer pour l'IA
         @param:
@@ -168,8 +169,8 @@ class MainJoueurIA(MainJoueur):
                 meilleure_carte = carte
             tapis_modif.enlever(carte.id)
         if combi_meilleure_carte is None:
-            self.cartes.sort(key = lambda x: x.valeur)
-            return self.cartes[0]
+            cartes_triees=sorted(self.cartes,key = lambda x: self.score_v1(x))
+            return cartes_triees[0]
         else:
             return meilleure_carte
 
@@ -183,187 +184,14 @@ class MainJoueurIA(MainJoueur):
         if len(combi1)!=len(combi2): return len(combi1)<len(combi2)
         #On calcule le nombre de carreaux dans chaque combinaison
         nb_carreaux_1=len([carte for carte in combi1 if carte.couleur=="d"])
-        nb_carreaux_2=len([carte for carte in combi1 if carte.couleur=="d"])
+        nb_carreaux_2=len([carte for carte in combi2 if carte.couleur=="d"])
         #On calcule le nombre de septs dans chaque combinaison
         nb_septs_1=len([carte for carte in combi1 if carte.hauteur=="7"])
-        nb_septs_2=len([carte for carte in combi1 if carte.hauteur=="7"])
+        nb_septs_2=len([carte for carte in combi2 if carte.hauteur=="7"])
         #On calcule le score de chaque combinaison en fonction de ces deux critères
         score_1 = 0.2*nb_carreaux_1+0.8*nb_septs_1
         score_2 = 0.2*nb_carreaux_2+0.8*nb_septs_2
         return score_1 < score_2
-
-
-    def choix_output_v1(self,tapis):
-        """prend en paramètre le tapis de jeu pour permettre à l'IA de choisir sa carte à jouer dans le but de marquer plus de points, retourne la carte choisie par l'IA si elle peut jouer sinon None """
-        #++++++++++tests sur les variables++++++++++
-        assert not(self.est_vide()),"l'IA n'a plus de cartes en main"
-        assert type(tapis)==Tapis,"l'objet en paramètre n'est pas un tapis"
-        assert not(tapis.est_vide()),"le tapis est vide"
-        valeurs_introuvables=[]#va stocker les valeurs cherchées pour lesquelles il n'y a pas de combinaison possible, afin d'éviter de perdre du temps et de les rechercher après
-        resultat=[]#stoke les différentes combinaisons possibles
-        contenu_tapis=tapis.contenu
-        assert type(contenu_tapis)==list ,"le contenu du tapis n'est pas une liste"
-        #print('ligen 153 tapis avant tri : ',contenu_tapis)
-        contenu_tapis=trier(contenu_tapis)#on trie le tapis par valeurs croissantes et les carreaux en avant
-        #print('ligne 155 tapis après tri :',contenu_tapis)
-        #print("ma main est : ",self.cartes)
-        #
-        #
-        #++++++++++corps de la fonction : constitution de toutes les combinaisons possibles avec les cartes de la main++++++++++
-        for carte in self.cartes:
-            assert type(carte)==Carte,"la carte étudiée n'est pas un objet Carte"
-            valeur_a_chercher=15-carte.valeur
-            if valeur_a_chercher not in valeurs_introuvables:
-                combinaisons=self.chercheValeur(valeur_a_chercher,contenu_tapis)#on cherche le 'reste' de la combinaison de 15 points si ce reste n'est pas déjà marqué introuvable
-                #print(combinaisons)
-                if combinaisons!=[None]:#s'il y a des combinaisons, combinaisons!=[None]
-                    #print("combi= ",combinaisons,"vérifier si les cartes sont bien dans le tapis = ",tapis)
-                    for combinaison in combinaisons:#on ajoute la carte de la main à toutes les combinaisons trouvées
-                        #print(combinaison)
-                        combinaison.append(carte)
-                        resultat.append(combinaison)
-                        #print(resultat)
-                else:#si on entre ici, il n'y a pas de combinaisons possibles pour la valeur cherchée donc elle est marquée introuvable pour éviter de la rechercher
-                    valeurs_introuvables.append(valeur_a_chercher)
-                    combinaisons.append(carte)
-                    resultat.append(combinaisons)#il n'y a pas de combinaisons pour la carte étudiée donc on rajoute à resultat la liste [None, carte étudiée]
-        #print("resultat= ",resultat)
-        #
-        #
-        #++++++++++détermination de la carte choisie++++++++++
-        #on va chercher la combinaison de score maximum parmi toutes celles recueillies
-        taille_tapis=len(contenu_tapis)#on prend en compte la taille du tapis afin de savoir si on fait scopa dans score
-        carte_choisie=self.choisitCarte(resultat,taille_tapis)
-        #print("la carte choisie est : ",carte_choisie,self.cartes)
-        assert carte_choisie in self.cartes or carte_choisie is None,"la carte choisie n'est pas dans la main de l'IA ou n'est pas None"
-        return carte_choisie
-
-
-
-
-    def choisitCarte(self,l_combi,taille_tapis):
-        """prend en paramètre une liste de combinaisons et la taille du tapis en cours d'utilisation et renvoie une carte ou None"""
-        assert type(l_combi)==list,"l_combi doit être une liste"
-        assert type(taille_tapis)==int and taille_tapis>0 and taille_tapis<=4, "la taille du tapis est un entier dans ]0;4]"
-        maxi=l_combi[0]
-        score_maxi=self.score_combinaison(maxi,taille_tapis)
-        for combinaison in l_combi:
-            assert type(combinaison)==list,"la combinaison doit être une liste"
-            #
-            #décommenter la ligne qui suit pour faire apparaître les scores des cartes
-            #print(f"score {combinaison[-1]}= {self.score_combinaison(combinaison,taille_tapis)} ")
-            if score_maxi<self.score_combinaison(combinaison,taille_tapis):#si le score de la combi est plus élevé que le score maxi => la combinaison maxi devient la combinaison étudiée
-                #print("score_maxi<self.score_combinaison(combinaison,taille_tapis)")
-                maxi=combinaison
-                score_maxi=self.score_combinaison(combinaison,taille_tapis)
-            elif score_maxi==self.score_combinaison(combinaison,taille_tapis):#si les scores sont égaux alors on va différencier en fonction de :
-                #print("score_maxi==self.score_combinaison(combinaison,taille_tapis)")
-                if self.carreau7_present(combinaison) and not(self.carreau7_present(maxi)) :#la présence du 7 de carreau dans la combi étudiée et pas dans la combi maximale
-                    #print("self.carreau7_present(combi)")
-                    maxi=combinaison
-                    score_maxi=self.score_combinaison(combinaison,taille_tapis)
-                elif len(maxi)<len(combinaison) and not(self.carreau7_present(maxi)):#la taille de la combi étudiée et l'absence du 7 de carreau dans la combinaison maximale
-                    #print("len(maxi)<len(combinaison) and not(self.carreau7_present(maxi))")
-                    maxi=combinaison
-                    score_maxi=self.score_combinaison(combinaison,taille_tapis)
-        if None in maxi:
-            choisie=None
-        else:
-            choisie=maxi[-1]
-        return choisie
-
-
-
-    def carreau7_present(self,combinaison):
-        """prend en paramètre une combinaison et renvoie true si le 7 de carreau s'y trouve, False sinon"""
-        assert type(combinaison)==list,"la combinaison en paramètre n'est pas une liste"
-        present=False
-        for carte in combinaison:
-            assert type(carte)==Carte or carte is None,"la combinaison n'est pas constituée d'objets Carte ou de None"
-            if carte is not None and carte.valeur==7 and carte.couleur=='d':
-                present=True
-        return present
-
-
-
-    def score_combinaison(self,combinaison,taille_tapis):
-        """prend en paramètres une combinaison de cartes et la taille du tapis en cours d'utilisation et retourne un score flottant entre 0 et 1 à la combinaison passée en paramètre"""
-
-        assert type(combinaison)==list,"la combinaison en paramètre n'est pas une liste"
-        assert taille_tapis>0 and taille_tapis<=4,"le taille du tapis n'est pas comprise entre 1 et 4 cartes"
-        if None in combinaison: return 0
-        score=len(combinaison)#minimum de score possible
-        if score==taille_tapis+1:return 1 #si la taille de la combinaison = combi de toutes les cartes du tapis + la carte jouée alors c'est scopa et il faut jouer cette combinaison donc score maximal
-        #print("nbr cartes => score= ",score)
-        for carte in combinaison:#pour chaque carte de la combinaison,
-            assert type(carte)==Carte,"l'objet étudié n'est pas une carte"
-            #print("carte étudiée = ",carte)
-            if carte.couleur=='d':#on va compter 1 point si carreau car celui qui a le plus de carreaux à la fin marque un point
-                score=score+1
-                #print("score= ",score)
-                #print("valeur carte = ",carte.valeur)
-                if carte.valeur==7:#celui qui a le 7 de carreaux marque 1 point à la fin
-                    score+=1
-                    #print("score= ",score)
-            else:
-                if carte.valeur==7:#celui qui a le plus de 7 à la fin marque 1 point
-                    score=score+1
-                    #print("score= ",score)
-        #print("score= ",score)
-        return score/11#le score maxi est 11 donc pour avoir un ombre entre 0 et 1 on divise par 11
-
-
-
-
-
-
-    def chercheValeur(self,valeur_a_chercher,contenu_tapis):
-        """prend en paramètre une valeur entière de combinaison de cartes à chercher et le contenu du tapis de jeu trié par valeur croissante de carte, les carreaux étant en avant dans chaque valeur de carte.
-        Renvoie une liste de combinaisons(listes) de cartes du tapis ou None s'il n'y a pas de combinaisons possibles"""
-        #on vérifie que les variables correspondent à ce qui est attendu
-        assert type(valeur_a_chercher)==int,"la valeur à chercher n'est pas un entier"#valeur doit être entier
-        assert valeur_a_chercher>=0 and valeur_a_chercher<15,"la valeur cherchée n'appartient pas à [0;15["#compris entre 0 et infèrieure stricte à 15
-        assert type(contenu_tapis)==list and contenu_tapis!=[],"le contenu du tapis n'est pas une liste et il n'est pas vide"#on vérifie que le tapis n'est pas vide
-        assert len(contenu_tapis)>0 and len(contenu_tapis)<=4,"le tapis contient entre 1 et 4 cartes"
-        dico_combinaisons={1:[[0]],
-            2:[[0],[1],[0,1]],
-            3:[[0],[1],[2],[0,1],[0,2],[1,2],[0,1,2]],
-            4:[[0],[1],[2],[3],[0,1],[0,2],[0,3],[1,2],[1,3],[2,3],[0,1,2],[0,1,3],[0,2,3],[1,2,3],[0,1,2,3]]
-            }#de la forme clé=taille du contenu de tapis valeur =[tableaux contenant les différentes combinaisons]
-        nbr_cartes=len(contenu_tapis)
-        #print('nbr cartes tapis',nbr_cartes)
-        assert nbr_cartes in dico_combinaisons.keys(),"il y a un problème avec le nombre de cartes"
-        combinaisons_possibles=dico_combinaisons[nbr_cartes]
-        #print(nbr_cartes," cartes donc : ",combinaisons_possibles)
-        resultat=[]
-        resultat_modifie=False#booleen qui va nous permettre de savoir si resultat a été modifiée
-        for groupe_indices in combinaisons_possibles:
-            #print("groupe indices évalués",groupe_indices)
-            somme=0
-            combi_en_cours=[]
-            #print("somme = ",somme)
-            for indice in groupe_indices:
-                carte=contenu_tapis[indice]#contenu_tapis[indice] est une carte
-                assert type(carte)==Carte,"l'objet étudié n'est pas un objt carte"
-                #print(carte)
-                somme+=carte.valeur
-                #print("somme = ",somme)
-                combi_en_cours.append(carte)
-                #print("combi_en_cours = ",combi_en_cours)
-            if somme==valeur_a_chercher:
-                resultat.append(combi_en_cours)
-                resultat_modifie=True
-                #print('resultat= ',resultat)
-        if not(resultat_modifie):
-            return [None]#si la liste resultat n'a pas été modifiée, alors il n'y a pas de combinaisons possibles et on renvoie [None]
-        else:
-            return resultat
-
-def trier(contenu_tapis):
-    """trie le contenu du tapis passé en pramètre par valeur et en ayant les carreaux en avant dans chaque valeur, on utilise pour cela l'attribut valeur2 de la classe Carte qui enlève 0.1 à chaque valeur d'une carte de couleur carreau"""
-    assert contenu_tapis!=[],"le tapis est vide"
-    resultat=sorted(contenu_tapis,key=lambda x:x.valeur2)
-    return resultat
 
 
 
@@ -422,33 +250,7 @@ if __name__=='__main__':
     assert j3.score_v1(Carte('d','7'))==1
     assert j3.score_v1(Carte('c','1'))==0.5
 
-    print('\n ----- Deuxième version : méthodes : choix_output(tapis), score_combinaison(combinaison), chercheValeur(valeur_a_chercher,contenu_tapis); \n fonctions : -trier(contenu_tapis)-----')
-    tapis=Tapis()
-    tapis.contenu=[Carte('c','7'),Carte('d','7'),Carte('h','5'),Carte('d','5')]
-    print("tapis avant tri : ",tapis.contenu)
-    contenu1=tapis.contenu
-    contenu1=trier(contenu1)#trier ok
-    print("tapis après tri : ",contenu1)
-    print('+++++trier ok+++++')
-    #print([Carte('d','5'),Carte('h','5'),Carte('d','7'),Carte('c','7')])
 
-    combi2=j3.chercheValeur(14,contenu1)#resultat attendu 1 combinaison
-    assert len(combi2)==1
-    combi1=j3.chercheValeur(12,contenu1)#resultat attendu 4 combinaisons
-    assert len(combi1)==4
-    combi3=j3.chercheValeur(11,contenu1)#resultat attendu 1 combinaison vide
-    print(combi3)
-    assert combi3==[None]
-    print("+++++chercheValeur OK+++++")
-
-    assert j3.score_combinaison(combi3,len(contenu1))==0/11#combinaison vide
-    #print(j3.score_combinaison(combi1[0])*11)
-    assert j3.score_combinaison(combi1[0],len(contenu1))==(2+1+1+1)/11
-    assert j3.score_combinaison(combi2[0],len(contenu1))==(2+1+1+1)/11
-    print("+++++score_combinaison ok+++++")
-
-    choisie=j3.choix_output(tapis)
-    assert choisie.valeur==1 and choisie.hauteur=='1' and choisie.couleur=='d'
     j4=MainJoueurIA([Carte('c','4'),Carte('d','3'),Carte('h','3')])
     tapis4=Tapis()
     tapis4.contenu=[Carte('s','J'),Carte('s','3'),Carte('s','5'),Carte('h','J')]
@@ -471,11 +273,11 @@ if __name__=='__main__':
     choisie=j5.choix_output(tapis_j5_2)
     assert choisie==j5.cartes[1]
     print('ok')
-    print("+++++tapis 3 : 2 cartes pas de combinaisons de valeur 15 possibles =>Que faire si ni l'IA et le joueur ne peuvent jouer ?+++++")
+    print("+++++tapis 3 : 2 cartes pas de combinaisons de valeur 15 possibles +++++")
     tapis_j5_3=Tapis()
     tapis_j5_3.contenu=[Carte('h','1'),Carte('s','1')]
     choisie=j5.choix_output(tapis_j5_3)
-    assert choisie==None
+    assert choisie==j5.cartes[3]
     print("ok")
     print("***** fin tests jeux 1*****\n*****tests jeux 2*****")
     j6=MainJoueurIA([Carte('d','7'),Carte('c','5'),Carte('c','3'),Carte('d','1'),Carte('c','6'),Carte('d','K')])
@@ -495,6 +297,7 @@ if __name__=='__main__':
     tapis_j7=Tapis()
     tapis_j7.contenu=[Carte('s','4'),Carte('h','4')]
     choisie=j7.choix_output(tapis_j7)
+    print(choisie)
     assert choisie.valeur==7 and choisie.couleur=='d'
     print('ok')
     print("**********\nFin des tests pour MainJoueurIA\n**********")

@@ -76,16 +76,21 @@ class Tapis():
         (on pourrait aussi traiter à part le 7 de carreaux...)
         Cette méthode actualise l'attribut scopa
         '''
-        #TODO: comment all the code of this method
-        self.quindici = False
-        combinaisons_possibles = []
+        self.quindici = False#On remet self.quindici à False
+        combinaisons_possibles = []#Listes des combinaisons possibles avec les cartes du tapis, pas forcément de 15 points.
         for i in range(1, len(self.contenu)+1):
             combinaisons_possibles.extend(list(itertools.combinations(self.contenu,i)))
+            #On utilise itertools pour former toutes les combinaisons possibles de i cartes,
+            #Avec celles du tapis (itertools.combinations renvoie des tuples contenant toutes les combinaisons possibles
+            #Avec le premier argument, dont la longueur est i, autrement dit ici tous les
+            #Arrangements de i cartes parmi celles de self.contenu
         combinaisons_possibles = [combinaison for combinaison in combinaisons_possibles if sum([x.valeur for x in combinaison])==15]
+        #On ne garde que celles dont la longueur est 15
         combinaisons_possibles.sort(key=len, reverse=True)
-        if len(combinaisons_possibles)!=0:
-            self.quindici = True
-            combinaison_max_cartes = [combinaisons_possibles[0]]
+        #On les trie par longueur, de la plus grande à la plus petite
+        if len(combinaisons_possibles)!=0:#Si il y a des combinaisons de 15 possibles
+            self.quindici = True#Il y a quindici => On le signale
+            combinaison_max_cartes = [combinaisons_possibles[0]]#On regarde si plusieurs combinaisons ont la même longueur que la plus longue
             max = len(combinaisons_possibles[0])
             for i in range(len(combinaisons_possibles)):
                 if len(combinaisons_possibles[i])==max:
@@ -94,13 +99,16 @@ class Tapis():
                     break
             combinaison_max_cartes.sort(key = lambda x:len([y for y in x if y.couleur == 'd']))
             combinaison_optimale = combinaison_max_cartes[-1]
+            #On trie la liste des combinaisons sélectionnées par nombre de carreaux, et on sélectionne la meilleure
+            #On notera ici qu'on ne prend pas en compte les 7
             if len(combinaison_optimale) == len(self.contenu):
-                self.scopa = True
+                self.scopa = True#On vérifie si il y a scopa
             else:
                 self.scopa = False
         else:
-            combinaison_optimale = []
-        return self.quindici, combinaison_optimale
+            combinaison_optimale = []#Si il n'y a aucune combinaison possible de cartes ont la somme des points fait 15
+            #On remplace combinaison_optimale par une liste vide
+        return self.quindici, combinaison_optimale#On renvoie le tout
 
 
 #test

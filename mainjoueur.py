@@ -106,6 +106,8 @@ class MainJoueur:
         return len([True for carte in self.cartes if carte.id.lower()=="d7"])
     def compte_ecus():
         return len([True for carte in self.cartes if carte.couleur == "d"])
+    def compte_7():
+        return len([True for carte in self.cartes if carte.hauteur == "7"])
 
 
 class MainJoueurIA(MainJoueur):

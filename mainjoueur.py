@@ -102,6 +102,8 @@ class MainJoueur:
             print('Vous passez votre tour : vous auriez dû vous concentrer et saisir le bon id')
         elif present:
             return choisie
+    def ecu_7():
+        return len([True for carte in self.cartes if carte.id.lower()=="c7"])
 
 
 class MainJoueurIA(MainJoueur):

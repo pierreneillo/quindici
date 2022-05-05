@@ -179,9 +179,16 @@ class MainJoueurIA(MainJoueur):
         @param:
           - @combi1: combinaison de cartes
           - @combi2: combinaison de cartes"""
+        #print("combi1=",combi1)
+        #print("combi2=",combi2)
         if combi1 is None: return True
         if combi2 == []: return False
-        if len(combi1)!=len(combi2): return len(combi1)<len(combi2)
+        if len(combi1)!=len(combi2):
+            if combi1[-1] in self.cartes:
+                print(f"score de {combi1[-1]}={len(combi1)}")
+            if combi2[-1] in self.cartes:
+                print(f"score de {combi2[-1]}={len(combi2)}")
+            return len(combi1)<len(combi2)
         #On calcule le nombre de carreaux dans chaque combinaison
         nb_carreaux_1=len([carte for carte in combi1 if carte.couleur=="d"])
         nb_carreaux_2=len([carte for carte in combi2 if carte.couleur=="d"])
@@ -191,6 +198,10 @@ class MainJoueurIA(MainJoueur):
         #On calcule le score de chaque combinaison en fonction de ces deux critères
         score_1 = 0.2*nb_carreaux_1+0.8*nb_septs_1
         score_2 = 0.2*nb_carreaux_2+0.8*nb_septs_2
+        if combi1[-1] in self.cartes:
+            print(f"score de {combi1[-1]}={score_1}")
+        if combi2[-1] in self.cartes:
+            print(f"score de {combi2[-1]}={score_2}")
         return score_1 < score_2
 
 
@@ -262,6 +273,7 @@ if __name__=='__main__':
     print("+++++tapis 1 : 2 combinaisons possibles car même score+++++")
     #Premier tapis
     j5=MainJoueurIA([Carte('d','5'),Carte('c','7'),Carte('h','6'),Carte('s','J'),Carte('c','1'),Carte('h','Q')])
+
     tapis_j5_1=Tapis()
     tapis_j5_1.contenu=[Carte('d','3'),Carte('h','5'),Carte('c','4'),Carte('s','7')]
     choisie=j5.choix_output(tapis_j5_1)

@@ -11,7 +11,7 @@ class Carte:
     #on récupère les dessins Unicode des cartes (sauf le cavalier)
     JEU_IMAGES = [[chr(127184 - c*16 + h + 1 + (h > 12)) for h in range(13)] for c in range(4)]
 
-       def __init__(self, couleur, hauteur):
+    def __init__(self, couleur, hauteur):
         '''
         @hauteur est un str de '1' pour l'As à 'K' pour le roi
         @couleur est un str entre 'c', 'd', 'h', 's'

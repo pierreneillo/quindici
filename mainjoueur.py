@@ -103,7 +103,7 @@ class MainJoueur:
         elif present:
             return choisie
     def ecu_7():
-        return len([True for carte in self.cartes if carte.id.lower()=="c7"])
+        return len([True for carte in self.cartes if carte.id.lower()=="d7"])
 
 
 class MainJoueurIA(MainJoueur):

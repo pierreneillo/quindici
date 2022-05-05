@@ -135,6 +135,7 @@ class Partie:
             id_carte_a_jouer = self.mains[0].choix_output().id
             carte_jouee = self.mains[0].rejeter(id_carte_a_jouer)
             self.tapis.ajouter(carte_jouee)
+            self.table.mise_a_jour(self.mains,self.tapis)
             print(f"Vous avez joué {carte_jouee}")
             quindici,combi_opt = self.tapis.tester_quindici()
             if quindici:
@@ -156,6 +157,7 @@ class Partie:
             id_carte_a_jouerIA = self.mains[1].choix_output(self.tapis).id
             carte_joueeIA = self.mains[1].rejeter(id_carte_a_jouerIA)
             self.tapis.ajouter(carte_joueeIA)
+            self.table.mise_a_jour(self.mains,self.tapis)
             print(f"L'IA a joué {carte_joueeIA}")
             quindici,combi_opt = self.tapis.tester_quindici()
             combi_opt=list(combi_opt)

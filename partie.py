@@ -101,19 +101,20 @@ class Partie:
 
 
 
-    def start(self):
+    def start(self,cas_de_base=4):
         '''
         mélange le paquet, coupe, distribue les cartes
-        pose 4 cartes sur le tapis
+        pose cas_de_base cartes sur le tapis
         n'affiche plus le tout car sinon le joueur voit le jeu de l'IA
         puis affiche ("on démarre")
         '''
         self.paquet.battre()
         self.paquet.couper()
         self.distribuer()
-        for _ in range(4):
+        for _ in range(cas_de_base):
             self.tapis.ajouter(self.paquet.tirer())
-        #print(self) NE PAS DECOMMENTER, sinon le joueur verra le jeu de l'IA
+        print("jeu IA :")
+        #self.mains[1].afficher()# NE PAS DECOMMENTER, sinon le joueur verra le jeu de l'IA
         print("on démarre")
 
     def simul_jeu(self):
@@ -122,59 +123,136 @@ class Partie:
             -Lance la partie
             -Fait jouer le Joueur et l'IA tant que les deux jeux ne sont pas vides
         '''
-        self.start()
-        #Pour l'instant le joueur commence dans tous les cas
-        while sum([int(not main.est_vide()) for main in self.mains])!=0:#Si au moins une main contient encore des cartes
-            #1 tour de boucle = 1 tour de jeu
-            #A 2 joueurs, le 'vrai' joueur est au Sud, soit à la position 0
-            #---------------------------Le 'vrai' joueur joue------------------------------------
-            self.table.mise_a_jour(self.mains,self.tapis)
-            print("Votre jeu :")#,self.mains[0])
-            self.mains[0].afficher()
-            print(self.tapis)
-            id_carte_a_jouer = self.mains[0].choix_output().id
-            carte_jouee = self.mains[0].rejeter(id_carte_a_jouer)
-            self.tapis.ajouter(carte_jouee)
-            self.table.mise_a_jour(self.mains,self.tapis)
-            print(f"Vous avez joué {carte_jouee}")
-            quindici,combi_opt = self.tapis.tester_quindici()
-            if quindici:
-                if self.tapis.scopa:
-                    print("Scopa! Vous ramassez toutes les cartes")
+        for i in range(3):
+            if i==0:self.start()
+            elif i>0:self.start(0)
+            #Pour l'instant le joueur commence dans tous les cas
+            while sum([int(not main.est_vide()) for main in self.mains])!=0:#Si au moins une main contient encore des cartes
+                #1 tour de boucle = 1 tour de jeu
+                #A 2 joueurs, le 'vrai' joueur est au Sud, soit à la position 0
+                #---------------------------Le 'vrai' joueur joue------------------------------------
+                self.table.mise_a_jour(self.mains,self.tapis)
+                print("Votre jeu :")#,self.mains[0])
+                self.mains[0].afficher()
+                print(self.tapis)
+                id_carte_a_jouer = self.mains[0].choix_output().id
+                carte_jouee = self.mains[0].rejeter(id_carte_a_jouer)
+                self.tapis.ajouter(carte_jouee)
+                self.table.mise_a_jour(self.mains,self.tapis)
+                print(f"Vous avez joué {carte_jouee}")
+                quindici,combi_opt = self.tapis.tester_quindici()
+                if quindici:
+                    if self.tapis.scopa:
+                        print("Scopa! Vous ramassez toutes les cartes")
+                        self.mains[0].nb_scopa+=1
+                    else:
+                        print("Quindici! Vous ramassez les cartes :", "-".join([str(c) for c in combi_opt]))
+                    #print(list(combi_opt))
+                    combi_opt=list(combi_opt)
+                    self.mains[0].ajoute_plis(combi_opt)
+                    for carte in combi_opt:
+                        self.tapis.enlever(carte.id)
                 else:
-                    print("Quindici! Vous ramassez les cartes :", "-".join([str(c) for c in combi_opt]))
-                #print(list(combi_opt))
-                combi_opt=list(combi_opt)
-                self.mains[0].ajoute_plis(combi_opt)
-                for carte in combi_opt:
-                    self.tapis.enlever(carte.id)
-            else:
-                print("Dommage :( vous n'avez rien ramassé cette fois-ci...")
+                    print("Dommage :( vous n'avez rien ramassé cette fois-ci...")
 
-            print(self.tapis)
-            self.table.mise_a_jour(self.mains,self.tapis,2)
-            #---------------------------------L'IA joue----------------------------------------
-            id_carte_a_jouerIA = self.mains[1].choix_output(self.tapis).id
-            carte_joueeIA = self.mains[1].rejeter(id_carte_a_jouerIA)
-            self.tapis.ajouter(carte_joueeIA)
-            self.table.mise_a_jour(self.mains,self.tapis)
-            print(f"L'IA a joué {carte_joueeIA}")
-            quindici,combi_opt = self.tapis.tester_quindici()
-            combi_opt=list(combi_opt)
-            if quindici:
-                if self.tapis.scopa:
-                    print("Scopa! L'IA ramasse toutes les cartes")
+                print(self.tapis)
+                self.table.mise_a_jour(self.mains,self.tapis,2)
+                #---------------------------------L'IA joue----------------------------------------
+                id_carte_a_jouerIA = self.mains[1].choix_output(self.tapis).id
+                carte_joueeIA = self.mains[1].rejeter(id_carte_a_jouerIA)
+                self.tapis.ajouter(carte_joueeIA)
+                self.table.mise_a_jour(self.mains,self.tapis)
+                print(f"L'IA a joué {carte_joueeIA}")
+                quindici,combi_opt = self.tapis.tester_quindici()
+                combi_opt=list(combi_opt)
+                if quindici:
+                    if self.tapis.scopa:
+                        self.mains[1].nb_scopa+=1
+                        print("Scopa! L'IA ramasse toutes les cartes")
+                    else:
+                        print("Quindici! L'IA ramasse les cartes :", "-".join([str(c) for c in combi_opt]))
+                    self.mains[1].ajoute_plis(combi_opt)
+                    for carte in combi_opt:
+                        self.tapis.enlever(carte.id)
                 else:
-                    print("Quindici! L'IA ramasse les cartes :", "-".join([str(c) for c in combi_opt]))
-                self.mains[1].ajoute_plis(combi_opt)
-                for carte in combi_opt:
-                    self.tapis.enlever(carte.id)
-            else:
-                print("L'IA n'a rien ramassé cette fois-ci...")
-            print(self.tapis)
+                    print("L'IA n'a rien ramassé cette fois-ci...")
+                print(self.tapis)
+                self.table.mise_a_jour(self.mains,self.tapis,2)
             self.table.mise_a_jour(self.mains,self.tapis,2)
-        self.table.mise_a_jour(self.mains,self.tapis,2)
+            print(f"+++++++++++FIN DU TOUR {i}++++++++++")
+        #------compter les points de fin de partie
+        self.compte_points_fin()
+        #afficher les scores
+        self.affiche_vainqueur()
         self.table.quitter()
+
+
+    def compte_points_fin(self):
+        """ comptabilise les points à la fin de la parie"""
+        #on stocke toutes les informations
+        nbr_cartes_0=len(self.mains[0].plis)
+        print("nbr_cartes_0= ",nbr_cartes_0)
+        nbr_cartes_1=len(self.mains[1].plis)
+        print("nbr_cartes_1= ",nbr_cartes_1)
+        nbr_ecus_0=self.mains[0].compte_ecus()
+        nbr_ecus_1=self.mains[1].compte_ecus()
+        print("nbr_ecus_0= ",nbr_ecus_0,"\n nbr_ecus_1= ",nbr_ecus_1)
+        nbr_7_0=self.mains[0].compte_7()
+        nbr_7_1=self.mains[1].compte_7()
+        print("nbr_7_0= ",nbr_7_0,"\n nbr_7_1= ",nbr_7_1)
+        ecu_7_0=self.mains[0].ecu_7()
+        ecu_7_1=not(ecu_7_0)
+        print("ecu_7_0= ",ecu_7_0,"\n ecu_7_1= ",ecu_7_1)
+        # et on les compare : nbr_cartes
+        if nbr_cartes_0<nbr_cartes_1:
+            self.mains[1].nb_scopa+=1
+        elif nbr_cartes_0==nbr_cartes_1:
+            self.mains[1].nb_scopa+=1
+            self.mains[0].nb_scopa+=1
+        else:
+            self.mains[0].nb_scopa+=1
+        # nbr_ecus:
+        if nbr_ecus_0<nbr_ecus_1:
+            self.mains[1].nb_scopa+=1
+        elif nbr_ecus_0==nbr_ecus_1:
+            self.mains[1].nb_scopa+=1
+            self.mains[0].nb_scopa+=1
+        else:
+            self.mains[0].nb_scopa+=1
+        # nbr_7 :
+        if nbr_7_0<nbr_7_1:
+            self.mains[1].nb_scopa+=1
+        elif nbr_7_0==nbr_7_1:
+            self.mains[1].nb_scopa+=1
+            self.mains[0].nb_scopa+=1
+        else:
+            self.mains[0].nb_scopa+=1
+        # ecu_7 :
+        if ecu_7_1:
+            self.mains[1].nb_scopa+=1
+        elif ecu_7_0:
+            self.mains[0].nb_scopa+=1
+
+    def affiche_vainqueur(self,graph=0):
+        """affiche la position du vainqueur, si le paramètre graph est renseigné : affichage graphique sinon dans le shell"""
+        #on désigne le vainqueur
+        vainqueur=self.mains[1].position
+        score=self.mains[1].nb_scopa
+        if self.mains[0].nb_scopa>score:
+            vainqueur=self.mains[0].position
+            score=self.mains[0].nb_scopa
+        elif score==self.mains[0].nb_scopa:
+            vainqueur=None
+            score=0
+        #on passe à l'affichage
+        if graph==0:
+            if vainqueur!=None: print(f"le joueur en position {vainqueur} a gagné avec un score de {score}")
+            else: print("Egalité personne ne remporte ce duel")
+        else:
+            pass#à compléter si on a le temps
+
+
+
 
 
 

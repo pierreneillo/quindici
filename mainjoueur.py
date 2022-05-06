@@ -102,12 +102,30 @@ class MainJoueur:
             print('Vous passez votre tour : vous auriez dû vous concentrer et saisir le bon id')
         elif present:
             return choisie
-    def ecu_7():
-        return len([True for carte in self.cartes if carte.id.lower()=="d7"])
-    def compte_ecus():
-        return len([True for carte in self.cartes if carte.couleur == "d"])
-    def compte_7():
-        return len([True for carte in self.cartes if carte.hauteur == "7"])
+
+    def compte_ecus(self):
+        """compte le nombre d'écus dans le plis et le renvoie"""
+        c=0
+        for carte in self.plis:
+            if carte.couleur=="d":
+                c+=1
+        return c
+
+    def compte_7(self):
+        """compte le nombre de 7 dans le plis et le renvoie"""
+        c=0
+        for carte in self.plis:
+            if carte.valeur==7:
+                c+=1
+        return c
+
+    def ecu_7(self):
+        """renvoie true si le 7 de carreaux est dans le plis,False sinon"""
+        present=False
+        for carte in self.plis:
+            if carte.couleur=="d" and carte.valeur==7:
+                present=True
+        return present
 
 
 class MainJoueurIA(MainJoueur):
@@ -189,12 +207,7 @@ class MainJoueurIA(MainJoueur):
         #print("combi2=",combi2)
         if combi1 is None: return True
         if combi2 == []: return False
-        if len(combi1)!=len(combi2):
-            if combi1[-1] in self.cartes:
-                print(f"score de {combi1[-1]}={len(combi1)}")
-            if combi2[-1] in self.cartes:
-                print(f"score de {combi2[-1]}={len(combi2)}")
-            return len(combi1)<len(combi2)
+        if len(combi1)!=len(combi2):return len(combi1)<len(combi2)
         #On calcule le nombre de carreaux dans chaque combinaison
         nb_carreaux_1=len([carte for carte in combi1 if carte.couleur=="d"])
         nb_carreaux_2=len([carte for carte in combi2 if carte.couleur=="d"])
@@ -204,10 +217,6 @@ class MainJoueurIA(MainJoueur):
         #On calcule le score de chaque combinaison en fonction de ces deux critères
         score_1 = 0.2*nb_carreaux_1+0.8*nb_septs_1
         score_2 = 0.2*nb_carreaux_2+0.8*nb_septs_2
-        if combi1[-1] in self.cartes:
-            print(f"score de {combi1[-1]}={score_1}")
-        if combi2[-1] in self.cartes:
-            print(f"score de {combi2[-1]}={score_2}")
         return score_1 < score_2
 
 

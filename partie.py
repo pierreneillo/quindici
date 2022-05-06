@@ -3,7 +3,7 @@ from cartes_paquet import Carte, PaquetCartes
 from mainjoueur import MainJoueur,MainJoueurIA
 from tapis import Tapis
 from constantes import *
-from table import Table
+from table import *
 
 
 
@@ -113,7 +113,7 @@ class Partie:
         self.distribuer()
         for _ in range(cas_de_base):
             self.tapis.ajouter(self.paquet.tirer())
-        print("jeu IA :")
+        #print("jeu IA :")
         #self.mains[1].afficher()# NE PAS DECOMMENTER, sinon le joueur verra le jeu de l'IA
         print("on démarre")
 
@@ -179,11 +179,12 @@ class Partie:
                 print(self.tapis)
                 self.table.mise_a_jour(self.mains,self.tapis,2)
             self.table.mise_a_jour(self.mains,self.tapis,2)
-            print(f"+++++++++++FIN DU TOUR {i}++++++++++")
+            print(f"+++++++++++FIN DU TOUR {i+1}++++++++++")
         #------compter les points de fin de partie
         self.compte_points_fin()
         #afficher les scores
         self.affiche_vainqueur()
+        self.affiche_vainqueur(1)
         self.table.quitter()
 
 
@@ -191,18 +192,18 @@ class Partie:
         """ comptabilise les points à la fin de la parie"""
         #on stocke toutes les informations
         nbr_cartes_0=len(self.mains[0].plis)
-        print("nbr_cartes_0= ",nbr_cartes_0)
+        #print("nbr_cartes_0= ",nbr_cartes_0)
         nbr_cartes_1=len(self.mains[1].plis)
-        print("nbr_cartes_1= ",nbr_cartes_1)
+        #print("nbr_cartes_1= ",nbr_cartes_1)
         nbr_ecus_0=self.mains[0].compte_ecus()
         nbr_ecus_1=self.mains[1].compte_ecus()
-        print("nbr_ecus_0= ",nbr_ecus_0,"\n nbr_ecus_1= ",nbr_ecus_1)
+        #print("nbr_ecus_0= ",nbr_ecus_0,"\n nbr_ecus_1= ",nbr_ecus_1)
         nbr_7_0=self.mains[0].compte_7()
         nbr_7_1=self.mains[1].compte_7()
-        print("nbr_7_0= ",nbr_7_0,"\n nbr_7_1= ",nbr_7_1)
+        #print("nbr_7_0= ",nbr_7_0,"\n nbr_7_1= ",nbr_7_1)
         ecu_7_0=self.mains[0].ecu_7()
         ecu_7_1=not(ecu_7_0)
-        print("ecu_7_0= ",ecu_7_0,"\n ecu_7_1= ",ecu_7_1)
+        #print("ecu_7_0= ",ecu_7_0,"\n ecu_7_1= ",ecu_7_1)
         # et on les compare : nbr_cartes
         if nbr_cartes_0<nbr_cartes_1:
             self.mains[1].nb_scopa+=1
@@ -245,11 +246,25 @@ class Partie:
             vainqueur=None
             score=0
         #on passe à l'affichage
+        #print("vainqueur=", vainqueur)
         if graph==0:
             if vainqueur!=None: print(f"le joueur en position {vainqueur} a gagné avec un score de {score}")
             else: print("Egalité personne ne remporte ce duel")
         else:
-            pass#à compléter si on a le temps
+            #print(vainqueur==None)
+            if vainqueur==None:
+                reponse="Egalité personne ne gagne"
+                coord=(340,400)
+            elif vainqueur=='S':
+                reponse="L'humain est invincible"
+                coord=(340,700)
+            elif vainqueur=='N':
+                reponse="L'humain n'est qu'une vermine sur mon chemin"
+                coord=(340,100)
+            #print(reponse,coord)
+            self.table.mise_a_jour([MainJoueur([],'S'),MainJoueurIA([],'N')],Tapis(),0)
+            e=Label(self.table.can,text=reponse)
+            e.place(x=coord[0],y=coord[1])
 
 
 
@@ -265,5 +280,13 @@ if __name__ == '__main__':
 
     test = Partie()
     #tests pour la fonction simul_jeu()
-    test.simul_jeu()
+    j1=MainJoueur([],'S')
+    j2=MainJoueurIA([],'N')
+    j2.nb_scopa=5
+    test.tapis=Tapis()
+    test.mains=[j1,j2]
+    test.affiche_vainqueur(1)
+    #test.simul_jeu()
+
+
 
